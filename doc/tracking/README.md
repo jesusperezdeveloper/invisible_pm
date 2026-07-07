@@ -22,7 +22,7 @@ Backend spec-driven **FreeForm** del SpecBox Engine (board `ff-7c307a263348`).
 
 | UC | Nombre | Estado | ACs |
 |---|---|---|---|
-| UC-005 | Herramienta publicar_acta_notion | 🔍 review | 2/3 |
+| UC-005 | Herramienta publicar_acta_notion | ✅ done | 3/3 |
 | UC-006 | Herramienta actualizar_trello | ✅ done | 3/3 |
 | UC-007 | Herramienta agendar_reunion | 🔍 review | 2/3 |
 | UC-008 | Registro del MCP completo y demo E2E | 🔍 review | 2/3 |
@@ -31,7 +31,6 @@ Backend spec-driven **FreeForm** del SpecBox Engine (board `ff-7c307a263348`).
 
 ACs pendientes y por qué:
 - **UC-002 AC-04** (cuenta Fireflies sin reuniones) — no verificable con esta cuenta.
-- **UC-005 AC-01** (crear acta real) — falta `NOTION_API_KEY` (integración + compartir página).
 - **UC-007 AC-01** (crear evento real) — falta `credentials.json` + `uv run autorizar_google.py`.
 - **UC-008 AC-03** (prompt mágico E2E) — ejecutable cuando estén las dos llaves anteriores.
 

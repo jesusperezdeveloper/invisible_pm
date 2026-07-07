@@ -602,11 +602,11 @@ leer_reunion({ "id": "3ec43a28…" })   // una concreta</code></pre>
     </article>
 
     <article class="paso">
-      <div class="paso-head"><h3>1.3 · Notion — integración interna</h3><span class="tiempo">5 min</span><span class="chip pend">⏳ pendiente</span></div>
+      <div class="paso-head"><h3>1.3 · Notion — integración interna</h3><span class="tiempo">5 min</span><span class="chip ok">✓ hecha 07/07</span></div>
       <div class="paso-body">
         <ul class="checks">
-          <li><label><input type="checkbox" data-k="f1-notion-int"><span>Crear integración interna en <a href="https://www.notion.so/my-integrations" rel="noopener">notion.so/my-integrations</a> → copiar el token → <code>NOTION_API_KEY</code> en el <code>.env</code></span></label></li>
-          <li><label><input type="checkbox" data-k="f1-notion-share"><span>En la página <b>Proyectos</b>: <code>···</code> → Conexiones → añadir tu integración<span class="nota">Este segundo paso es el que TODO el mundo olvida.</span></span></label></li>
+          <li><label><input type="checkbox" data-k="f1-notion-int" data-done="1"><span>Crear integración interna en <a href="https://www.notion.so/my-integrations" rel="noopener">notion.so/my-integrations</a> → copiar el token → <code>NOTION_API_KEY</code> en el <code>.env</code></span></label></li>
+          <li><label><input type="checkbox" data-k="f1-notion-share" data-done="1"><span>En la página <b>Proyectos</b>: <code>···</code> → Conexiones → añadir tu integración<span class="nota">Este segundo paso es el que TODO el mundo olvida (comprobado: la búsqueda por nombre en "Busca conexiones…").</span></span></label></li>
         </ul>
       </div>
       <div class="pq-grid">
@@ -790,7 +790,7 @@ Dime al final el comando exacto de claude mcp add para registrarlo.</code></pre>
 
     <div class="gotcha">
       <b>Gotchas cazados en el ensayo (munición para la depuración didáctica)</b>
-      <p>① Fireflies: el argumento es <code>transcript(id:)</code>, no <code>transcriptId</code> — el propio error de la API dice qué espera: 2 min de oro didáctico (a los 5, corta y usa la versión probada). ② Con clave inválida Fireflies responde HTTP 200 + array <code>errors</code>, no un 401. ③ Plaud: los errores de la CLI van marcados con <code>✗ [CÓDIGO]</code> — no busques "404" en la salida cruda: el <code>serial_number</code> de una reunión puede contenerlo (nos pasó). ④ La validación pydantic rechaza <code>limite=99</code> antes de tocar la API: enséñalo.</p>
+      <p>① Fireflies: el argumento es <code>transcript(id:)</code>, no <code>transcriptId</code> — el propio error de la API dice qué espera: 2 min de oro didáctico (a los 5, corta y usa la versión probada). ② Con clave inválida Fireflies responde HTTP 200 + array <code>errors</code>, no un 401. ③ Plaud: los errores de la CLI van marcados con <code>✗ [CÓDIGO]</code> — no busques "404" en la salida cruda: el <code>serial_number</code> de una reunión puede contenerlo (nos pasó). ④ La validación pydantic rechaza <code>limite=99</code> antes de tocar la API: enséñalo. ⑤ Notion: el buscador <code>/search</code> <b>tarda en indexar páginas recién creadas</b> — la tool lo salva recorriendo los hijos de las páginas visibles (verificado creando el acta bajo una ReservaFácil de 30 segundos de vida).</p>
     </div>
   </section>
 
@@ -843,7 +843,7 @@ Dime al final el comando exacto de claude mcp add para registrarlo.</code></pre>
       <div class="paso-body">
         <ul class="checks">
           <li><label><input type="checkbox" data-k="f4-trello" data-done="1"><span>Tablero Trello <b>ReservaFácil</b> con <i>Por hacer / En curso / Hecho</i> y 4 tarjetas creíbles<span class="nota">✓ Creado en el ensayo: trello.com/b/hEKGi4Jq — login en Hecho, pagos atascados en En curso.</span></span></label></li>
-          <li><label><input type="checkbox" data-k="f4-notion"><span>Página Notion <b>Proyectos → ReservaFácil</b> con un acta antigua de ejemplo</span></label></li>
+          <li><label><input type="checkbox" data-k="f4-notion" data-done="1"><span>Página Notion <b>Proyectos → ReservaFácil</b> con un acta antigua de ejemplo<span class="nota">✓ Creadas en el ensayo POR el propio MCP (doble test de publicar_acta_notion).</span></span></label></li>
         </ul>
       </div>
       <div class="pq-grid">
@@ -997,7 +997,7 @@ Cuando termines, resume todo lo que has hecho.</code></pre>
           <tr><td><b>Fireflies</b> (<code>listar</code>/<code>leer</code>)</td><td>Batería contra API real; bug <code>transcript(id:)</code> cazado y corregido; conmutación verificada</td><td><span class="chip ok">✓ verde</span></td></tr>
           <tr><td><b>Propuesta</b> (<code>guiar_propuesta</code> + prompt <code>/propuesta</code>)</td><td>Expediente con participantes y plantilla verificado sobre reunión real; prompt expuesto por protocolo. Falta el borrador E2E en conversación</td><td><span class="chip pend">⏳ 3/4</span></td></tr>
           <tr><td><b>Trello</b> (<code>actualizar_trello</code>)</td><td>Tarjeta real con checklist + vencimiento, movida a Hecho, limpiada; tablero demo creado</td><td><span class="chip ok">✓ verde</span></td></tr>
-          <tr><td><b>Notion</b> (<code>publicar_acta_notion</code>)</td><td>Código listo; error-guía verificado</td><td><span class="chip pend">⏳ falta token (paso 1.3)</span></td></tr>
+          <tr><td><b>Notion</b> (<code>publicar_acta_notion</code>)</td><td>Actas reales creadas (ReservaFácil + acta antigua, markdown→bloques); fallback anti-lag del índice verificado</td><td><span class="chip ok">✓ verde</span></td></tr>
           <tr><td><b>Calendar</b> (<code>agendar_reunion</code>)</td><td>Código listo; error-guía verificado</td><td><span class="chip pend">⏳ falta OAuth (paso 1.4)</span></td></tr>
           <tr><td><b>Registro</b> <code>invisible-pm</code></td><td><code>claude mcp list</code> → ✓ Connected (con <code>FUENTE_REUNIONES=plaud</code>)</td><td><span class="chip ok">✓ verde</span></td></tr>
           <tr><td><b>Demo E2E</b> (prompt mágico)</td><td>Pendiente de 1.3 + 1.4 — el ensayo general</td><td><span class="chip pend">⏳ paso 6.1</span></td></tr>

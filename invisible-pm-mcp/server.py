@@ -464,6 +464,37 @@ def _markdown_a_bloques(md: str) -> list[dict]:
     return [{"object": "block", **b} for b in bloques]
 
 
+def _titulo_de_pagina(pagina: dict) -> str:
+    for prop in (pagina.get("properties") or {}).values():
+        if prop.get("type") == "title":
+            return "".join(t.get("plain_text", "") for t in prop.get("title", []))
+    return ""
+
+
+def _notion_buscar_pagina(nombre: str) -> str | None:
+    """Busca una página por nombre. El buscador de Notion tarda en indexar páginas
+    recién creadas, así que si /search no la encuentra, recorre los hijos directos
+    de las páginas visibles buscando el título (caso Proyectos → ReservaFácil nueva)."""
+    objetivo = nombre.strip().lower()
+    resultado = _notion(
+        "POST", "/search", {"query": nombre, "filter": {"value": "page", "property": "object"}}
+    )
+    paginas = resultado.get("results") or []
+    for p in paginas:  # preferir coincidencia exacta de título
+        if _titulo_de_pagina(p).strip().lower() == objetivo:
+            return p["id"]
+    if paginas:
+        return paginas[0]["id"]
+    # Fallback anti-lag del índice: mirar los hijos de todas las páginas visibles
+    todas = _notion("POST", "/search", {"filter": {"value": "page", "property": "object"}})
+    for p in (todas.get("results") or [])[:20]:
+        hijos = _notion("GET", f"/blocks/{p['id']}/children?page_size=100")
+        for h in hijos.get("results") or []:
+            if h.get("type") == "child_page" and h["child_page"].get("title", "").strip().lower() == objetivo:
+                return h["id"]
+    return None
+
+
 @mcp.tool
 def publicar_acta_notion(
     titulo: Annotated[str, Field(description="Título de la página del acta, p. ej. 'Acta — ReservaFácil, 7 jul 2026'")],
@@ -472,20 +503,12 @@ def publicar_acta_notion(
 ) -> str:
     """Crea la página del acta en Notion debajo de la página indicada y devuelve su URL.
     La página padre debe estar compartida con la integración de Notion."""
-    parent_id = os.environ.get("NOTION_PARENT_PAGE_ID")
+    parent_id = os.environ.get("NOTION_PARENT_PAGE_ID") or _notion_buscar_pagina(pagina_padre)
     if not parent_id:
-        resultado = _notion(
-            "POST",
-            "/search",
-            {"query": pagina_padre, "filter": {"value": "page", "property": "object"}},
+        raise ToolError(
+            f"No encuentro ninguna página '{pagina_padre}' en Notion. "
+            "¿Está compartida con la integración? (··· → Conexiones → tu integración)"
         )
-        paginas = resultado.get("results") or []
-        if not paginas:
-            raise ToolError(
-                f"No encuentro ninguna página '{pagina_padre}' en Notion. "
-                "¿Está compartida con la integración? (··· → Conexiones → tu integración)"
-            )
-        parent_id = paginas[0]["id"]
     bloques = _markdown_a_bloques(contenido_markdown)
     pagina = _notion(
         "POST",
