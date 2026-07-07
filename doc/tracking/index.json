@@ -10,5 +10,5 @@
     "uc": 4,
     "ac": 13
   },
-  "note": "La fuente de verdad es items.json. config.json y labels.json replican el board creado por setup_board."
+  "note": "La fuente de verdad es items.json. Spec v2: servidor reescrito en Python + FastMCP (antes Node.js)."
 }

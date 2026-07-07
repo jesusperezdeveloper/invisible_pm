@@ -1,6 +1,21 @@
-node_modules/
-.DS_Store
-*.log
+# Secretos — NUNCA subir
 .env
+.env.*
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node (backup fireflies-mcp)
+node_modules/
+
+# Sistema / Office
+.DS_Store
+~$*
+
+# Runtime SpecBox
 .quality/logs/
 .quality/pending_heartbeats.jsonl
+*.log
+.quality/read_tracker.jsonl

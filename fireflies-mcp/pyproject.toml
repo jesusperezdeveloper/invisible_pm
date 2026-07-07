@@ -1,0 +1,9 @@
+[project]
+name = "fireflies-mcp"
+version = "2.0.0"
+description = "Servidor MCP mínimo que conecta Claude Code con las reuniones de Fireflies (2 herramientas: listar_reuniones y leer_reunion)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.10",
+    "httpx>=0.27",
+]

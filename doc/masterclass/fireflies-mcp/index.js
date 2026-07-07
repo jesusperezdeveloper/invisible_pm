@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * MCP Fireflies — El Project Manager invisible · Masterclass MCP
+ * MCP Fireflies — PotenzIA · Masterclass MCP
  * Servidor MCP mínimo que conecta Claude Code con tus reuniones de Fireflies.
  * 2 herramientas: listar_reuniones y leer_reunion.
  *
  * Uso:
  *   FIREFLIES_API_KEY=tu_clave node index.js
  *
- * Registro en Claude Code:
- *   claude mcp add fireflies -e FIREFLIES_API_KEY=tu_clave -- node /ruta/absoluta/fireflies-mcp/index.js
+ * Registro en Claude Code (desde esta carpeta):
+ *   claude mcp add fireflies -e FIREFLIES_API_KEY=tu_clave -- node /ruta/absoluta/index.js
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -18,37 +18,24 @@ import { z } from "zod";
 const API_URL = "https://api.fireflies.ai/graphql";
 const API_KEY = process.env.FIREFLIES_API_KEY;
 
-// ── Llamada genérica a la API GraphQL de Fireflies ──────────────────────
+// ── Llamada genérica a la API de Fireflies ──────────────────────────────
 async function fireflies(query, variables = {}) {
   if (!API_KEY) {
     throw new Error(
-      "Falta la clave de Fireflies. Arranca el servidor con FIREFLIES_API_KEY=tu_clave. " +
-        "La clave se genera en Fireflies → Settings → Developer settings → API key."
+      "Falta la clave. Arranca el servidor con FIREFLIES_API_KEY=tu_clave (Fireflies → Settings → Developer settings → API key)."
     );
   }
-  let res;
-  try {
-    res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify({ query, variables }),
-    });
-  } catch {
-    throw new Error("No se pudo conectar con Fireflies. Comprueba tu conexión a internet.");
-  }
-  if (res.status === 401 || res.status === 403) {
-    throw new Error("Fireflies rechazó la clave (API key inválida o caducada). Genera una nueva en Settings → Developer settings.");
-  }
-  const json = await res.json().catch(() => null);
-  if (!json) {
-    throw new Error(`Fireflies devolvió una respuesta inesperada (HTTP ${res.status}).`);
-  }
-  if (json.errors?.length) {
-    const detalle = json.errors.map((e) => e.message).join("; ");
-    throw new Error("Fireflies respondió con error: " + detalle);
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${API_KEY}`,
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+  const json = await res.json();
+  if (json.errors) {
+    throw new Error("Fireflies respondió con error: " + JSON.stringify(json.errors));
   }
   return json.data;
 }
@@ -57,7 +44,7 @@ const fecha = (ms) =>
   ms ? new Date(Number(ms)).toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short" }) : "sin fecha";
 
 // ── Servidor MCP ────────────────────────────────────────────────────────
-const server = new McpServer({ name: "fireflies-invisible-pm", version: "1.0.0" });
+const server = new McpServer({ name: "fireflies-potenzia", version: "1.0.0" });
 
 server.tool(
   "listar_reuniones",
@@ -91,7 +78,9 @@ server.tool(
   async ({ id }) => {
     let transcriptId = id;
     if (!transcriptId) {
-      const ultima = await fireflies(`query { transcripts(limit: 1) { id } }`);
+      const ultima = await fireflies(
+        `query { transcripts(limit: 1) { id } }`
+      );
       transcriptId = ultima.transcripts?.[0]?.id;
       if (!transcriptId) {
         return { content: [{ type: "text", text: "No hay ninguna reunión grabada en esta cuenta." }] };
@@ -108,9 +97,6 @@ server.tool(
       { id: transcriptId }
     );
     const t = data.transcript;
-    if (!t) {
-      return { content: [{ type: "text", text: `No existe ninguna reunión con id ${transcriptId}.` }] };
-    }
     const dialogo = (t.sentences || [])
       .map((s) => `${s.speaker_name || "Desconocido"}: ${s.text}`)
       .join("\n");
@@ -134,4 +120,4 @@ server.tool(
 // ── Arranque ────────────────────────────────────────────────────────────
 const transport = new StdioServerTransport();
 await server.connect(transport);
-console.error("MCP Fireflies · invisible_pm en marcha ✓");
+console.error("MCP Fireflies PotenzIA en marcha ✓");

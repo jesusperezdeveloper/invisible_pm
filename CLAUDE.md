@@ -6,13 +6,15 @@
 
 | Tecnologia | Version |
 |------------|---------|
-| unknown |  |
+| python | >= 3.11 (FastMCP 2.x, gestionado con uv) |
 | Backend | none |
 | Database |  |
 
 ## Arquitectura
 
-Patrones estandar para stack unknown. Editar esta seccion con la arquitectura especifica del proyecto.
+Servidor MCP en Python con FastMCP (`fireflies-mcp/server.py`): transporte stdio, 2 herramientas
+(`listar_reuniones`, `leer_reunion`) contra la API GraphQL de Fireflies. Dependencias con uv
+(`pyproject.toml` + `uv.lock`). Los materiales de la masterclass viven en `doc/masterclass/`.
 
 Ver patrones detallados en: specbox-engine/architecture/{stack}/
 
