@@ -27,6 +27,7 @@ Backend spec-driven **FreeForm** del SpecBox Engine (board `ff-7c307a263348`).
 | UC-007 | Herramienta agendar_reunion | 🔍 review | 2/3 |
 | UC-008 | Registro del MCP completo y demo E2E | 🔍 review | 2/3 |
 | UC-009 | Fuente conmutable Plaud ↔ Fireflies (`FUENTE_REUNIONES`) | ✅ done | 4/4 |
+| UC-010 | Guiar propuesta — de la reunión al borrador comercial (tool + prompt MCP) | 🔍 review | 3/4 |
 
 ACs pendientes y por qué:
 - **UC-002 AC-04** (cuenta Fireflies sin reuniones) — no verificable con esta cuenta.

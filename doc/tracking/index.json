@@ -7,8 +7,8 @@
   "board_id": "ff-7c307a263348",
   "counts": {
     "us": 2,
-    "uc": 9,
-    "ac": 29
+    "uc": 10,
+    "ac": 33
   },
   "note": "La fuente de verdad es items.json. US-01: nucleo Fireflies (FastMCP). US-02: pipeline completo invisible-pm (Notion + Trello + Calendar en el mismo MCP)."
 }

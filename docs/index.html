@@ -214,7 +214,7 @@
     <p class="lede"><strong>El ejercicio:</strong> termina una reunión y un único prompt en Claude Code la convierte en <strong>acta en Notion</strong>, <strong>tarjetas en Trello</strong> con criterios de aceptación y <strong>la próxima reunión en Calendar</strong> — a través de <strong>un solo MCP propio</strong> (<code>invisible-pm</code>, Python + FastMCP) construido desde cero delante de la clase. Esta guía recorre todo: el repo, las llaves, cada herramienta por dentro, y qué se rompe si un paso se salta.</p>
     <div class="stats">
       <div class="stat"><div class="n">1</div><div class="l">MCP propio</div></div>
-      <div class="stat"><div class="n">5</div><div class="l">Herramientas</div></div>
+      <div class="stat"><div class="n">6</div><div class="l">Herramientas</div></div>
       <div class="stat"><div class="n">4</div><div class="l">Acreditaciones</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Prompt mágico</div></div>
       <div class="stat"><div class="n">20–30<span style="font-size:20px;">min</span></div><div class="l">Recuperados por reunión</div></div>
@@ -308,7 +308,7 @@
     <div class="fase-head">
       <div class="fase-num">§</div>
       <div class="meta">
-        <h2>Las 5 herramientas, por dentro</h2>
+        <h2>Las 6 herramientas, por dentro</h2>
         <p class="sub">Cómo funciona la invocación: Claude solo ve el <b>nombre</b>, la <b>descripción</b> y el <b>esquema de parámetros</b> de cada herramienta. Con eso decide cuál llamar y con qué argumentos; Claude Code ejecuta la llamada (con tu permiso), y el resultado vuelve a su contexto como texto. Por eso las descripciones están escritas en español claro: <b>la descripción ES la interfaz</b>.</p>
       </div>
     </div>
@@ -367,6 +367,36 @@
         <p class="frase">"Lee la última reunión…" (paso 0 del prompt mágico)</p>
         <pre><code>leer_reunion({})            // sin id → la última
 leer_reunion({ "id": "3ec43a28…" })   // una concreta</code></pre>
+      </div>
+    </article>
+
+    <!-- guiar_propuesta -->
+    <article class="tool-card">
+      <div class="tool-head"><code class="nombre-tool">guiar_propuesta(id?, tipo="servicios")</code><span class="servicio">Plaud · Fireflies + plantilla propia</span></div>
+      <div class="tool-grid">
+        <div class="tool-cell">
+          <div class="t">Por qué existe en el MCP</div>
+          <p><b>La tool no redacta: cura.</b> El MCP no tiene LLM dentro — el que razona es Claude. Esta herramienta convierte la reunión en el <b>expediente que un consultor senior le daría a un junior</b>: participantes detectados, contenido completo, plantilla de propuesta por secciones y reglas de qué se puede afirmar y qué no. Claude redacta el borrador encima.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Servicio que usa</div>
+          <p>La fuente de reuniones activa (Plaud o Fireflies, como <code>leer_reunion</code>) + una <b>plantilla embebida</b> de 8 secciones: contexto, necesidades con cita literal, solución, alcance por fases, cronograma, inversión, supuestos y próximos pasos.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">La regla anti-invención</div>
+          <p>Todo lo que la reunión <b>no diga</b> se marca <code>[TBD: qué falta]</code> — presupuestos, plazos, nombres. Y el borrador termina con las <b>preguntas abiertas</b> que el usuario debe responder para cerrar cada hueco. Propuesta con lagunas visibles &gt; propuesta alucinada.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">El bonus: también es un prompt MCP</div>
+          <p>La misma lógica se expone como <b>prompt del servidor</b> — en Claude Code: <code>/mcp__invisible-pm__propuesta</code>. Frase para la clase: <i>"las tools son las manos del MCP; los prompts, sus recetas"</i>. Tercer primitivo MCP en un minuto.</p>
+        </div>
+      </div>
+      <div class="tool-invoca">
+        <div class="t">Cómo la invoca Claude</div>
+        <p class="frase">"Prepárame una propuesta a partir de la reunión de ayer con Dental Data"</p>
+        <pre><code>guiar_propuesta({ "id": "80b4a2e3…", "tipo": "servicios" })
+// → expediente + plantilla → Claude redacta el BORRADOR con [TBD]s
+//   y cierra con las preguntas para afinar inversión, plazos y decisor</code></pre>
       </div>
     </article>
 
@@ -965,6 +995,7 @@ Cuando termines, resume todo lo que has hecho.</code></pre>
         <tbody>
           <tr><td><b>Plaud</b> (fuente por defecto)</td><td>Reuniones reales (11m y 3h13m) vía CLI; truncado a 20k; sesión caducada → mensaje-guía</td><td><span class="chip ok">✓ verde</span></td></tr>
           <tr><td><b>Fireflies</b> (<code>listar</code>/<code>leer</code>)</td><td>Batería contra API real; bug <code>transcript(id:)</code> cazado y corregido; conmutación verificada</td><td><span class="chip ok">✓ verde</span></td></tr>
+          <tr><td><b>Propuesta</b> (<code>guiar_propuesta</code> + prompt <code>/propuesta</code>)</td><td>Expediente con participantes y plantilla verificado sobre reunión real; prompt expuesto por protocolo. Falta el borrador E2E en conversación</td><td><span class="chip pend">⏳ 3/4</span></td></tr>
           <tr><td><b>Trello</b> (<code>actualizar_trello</code>)</td><td>Tarjeta real con checklist + vencimiento, movida a Hecho, limpiada; tablero demo creado</td><td><span class="chip ok">✓ verde</span></td></tr>
           <tr><td><b>Notion</b> (<code>publicar_acta_notion</code>)</td><td>Código listo; error-guía verificado</td><td><span class="chip pend">⏳ falta token (paso 1.3)</span></td></tr>
           <tr><td><b>Calendar</b> (<code>agendar_reunion</code>)</td><td>Código listo; error-guía verificado</td><td><span class="chip pend">⏳ falta OAuth (paso 1.4)</span></td></tr>

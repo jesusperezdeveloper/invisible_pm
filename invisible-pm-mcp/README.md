@@ -14,6 +14,7 @@ Claude Code redacta el acta y decide; este MCP le da las acreditaciones para eje
 |---|---|---|
 | `listar_reuniones(limite)` | **Plaud** o Fireflies | Últimas reuniones: id, título, fecha, duración |
 | `leer_reunion(id?)` | **Plaud** o Fireflies | Resumen y transcripción con hablantes (truncada a 20k caracteres). Sin `id` = la última |
+| `guiar_propuesta(id?, tipo?)` | **Plaud** o Fireflies | Expediente para redactar un **borrador de propuesta**: participantes + contenido + plantilla de 8 secciones con reglas anti-invención (`[TBD]` para lo no dicho). También como prompt MCP: `/mcp__invisible-pm__propuesta` |
 | `publicar_acta_notion(titulo, contenido_markdown, pagina_padre?)` | Notion | Crea la página del acta (markdown → bloques) y devuelve su URL |
 | `actualizar_trello(nuevas_tarjetas, completadas?, tablero?)` | Trello | Tarjetas en "Por hacer" con responsable + checklist de criterios + vencimiento; mueve a "Hecho" lo cerrado |
 | `agendar_reunion(titulo, inicio, duracion_minutos?, descripcion?, invitados?)` | Calendar | Crea el evento y devuelve el enlace |

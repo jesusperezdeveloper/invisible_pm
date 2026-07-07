@@ -743,5 +743,96 @@
     },
     "created_at": "2026-07-07T16:20:00.000000+00:00",
     "updated_at": "2026-07-07T16:20:00.000000+00:00"
+  },
+  {
+    "id": "item-546a2a49",
+    "name": "UC-010: Guiar propuesta — de la reunión al borrador comercial",
+    "description": "# UC-010: Guiar propuesta — de la reunión al borrador comercial\n\n**User Story:** US-02: Pipeline completo del PM invisible en un solo MCP\n**Actor:** Claude Code (cliente MCP)\n**Horas estimadas:** 1.0\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: guiar_propuesta devuelve el expediente: participantes detectados de la transcripción + contenido de la reunión de la fuente activa (verificado con reunión real de Plaud)\n- AC-02: AC-02: La plantilla incluye las 8 secciones del borrador y las reglas anti-invención: citas literales para dolores y [TBD] para todo lo no dicho (presupuesto, plazos, nombres)\n- AC-03: AC-03: El prompt MCP 'propuesta' se expone por prompts/list y prompts/get (slash command /mcp__invisible-pm__propuesta en Claude Code)\n- AC-04: AC-04: Borrador E2E generado en conversación real: Claude llama a la tool, redacta el borrador con TBDs y termina con las preguntas abiertas\n\n## Contexto\nLa tool no redacta: cura el conocimiento de la reunión en un expediente (participantes + contenido + plantilla de 8 secciones + checklist de huecos) y Claude redacta el borrador marcando [TBD] lo no dicho. Doble primitivo didáctico: tool guiar_propuesta + prompt MCP 'propuesta' (las tools son las manos; los prompts, las recetas).",
+    "state": "review",
+    "parent_id": "item-9c5745c9",
+    "labels": [
+      "UC",
+      "Actor:Claude Code (cliente MCP)"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "UC",
+      "uc_id": "UC-010",
+      "us_id": "US-02",
+      "horas": 1.0,
+      "pantallas": "",
+      "actor": "Claude Code (cliente MCP)"
+    },
+    "created_at": "2026-07-07T18:10:00.000000+00:00",
+    "external_source": "",
+    "external_id": "",
+    "updated_at": "2026-07-07T18:10:00.000000+00:00"
+  },
+  {
+    "id": "ac-5b1eac3a",
+    "name": "[AC-01] AC-01: guiar_propuesta devuelve el expediente: participantes detectados de la transcripción + contenido de la reunión de la fuente activa (verificado con reunión real de Plaud)",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-546a2a49",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-01",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T18:10:00.000000+00:00",
+    "updated_at": "2026-07-07T18:10:00.000000+00:00"
+  },
+  {
+    "id": "ac-822132c8",
+    "name": "[AC-02] AC-02: La plantilla incluye las 8 secciones del borrador y las reglas anti-invención: citas literales para dolores y [TBD] para todo lo no dicho (presupuesto, plazos, nombres)",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-546a2a49",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-02",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T18:10:00.000000+00:00",
+    "updated_at": "2026-07-07T18:10:00.000000+00:00"
+  },
+  {
+    "id": "ac-c438ae98",
+    "name": "[AC-03] AC-03: El prompt MCP 'propuesta' se expone por prompts/list y prompts/get (slash command /mcp__invisible-pm__propuesta en Claude Code)",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-546a2a49",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-03",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T18:10:00.000000+00:00",
+    "updated_at": "2026-07-07T18:10:00.000000+00:00"
+  },
+  {
+    "id": "ac-1fe7809e",
+    "name": "[AC-04] AC-04: Borrador E2E generado en conversación real: Claude llama a la tool, redacta el borrador con TBDs y termina con las preguntas abiertas",
+    "description": "",
+    "state": "backlog",
+    "parent_id": "item-546a2a49",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-04",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T18:10:00.000000+00:00"
   }
 ]

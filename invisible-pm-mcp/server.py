@@ -273,6 +273,98 @@ def leer_reunion(
 
 
 # ════════════════════════════════════════════════════════════════════════
+# GUIAR PROPUESTA — de la reunión al borrador comercial
+# ════════════════════════════════════════════════════════════════════════
+
+
+def _leer_fuente(id: str | None) -> str:
+    """Contenido de la reunión según la fuente activa (mismo texto que leer_reunion)."""
+    if FUENTE_REUNIONES == "fireflies":
+        return _fireflies_leer(id)
+    return _plaud_leer(id)
+
+
+def _participantes(contenido: str) -> list[str]:
+    """Nombres únicos de quien habla, extraídos de la transcripción."""
+    # solo el bloque de diálogo — las cabeceras (REUNIÓN:, FECHA:) también llevan dos puntos
+    _, _, dialogo = contenido.partition("TRANSCRIPCIÓN:")
+    vistos: list[str] = []
+    for linea in (dialogo or contenido).splitlines():
+        # Plaud: "[MM:SS - MM:SS] Nombre: texto" · Fireflies: "Nombre: texto"
+        m = re.match(r"^(?:\[[\d:]+\s*-\s*[\d:]+\]\s*)?([A-ZÁÉÍÓÚÑ][\w .áéíóúñÁÉÍÓÚÑ-]{1,40}?):\s", linea)
+        if m and m.group(1) not in vistos:
+            vistos.append(m.group(1))
+    return vistos
+
+
+PLANTILLA_PROPUESTA = """\
+== INSTRUCCIONES PARA REDACTAR EL BORRADOR ==
+Redacta AHORA un borrador completo de propuesta de {tipo} en markdown, siguiendo las
+secciones de abajo. Reglas innegociables:
+- Todo lo que afirmes del cliente debe salir de la reunión; cita literalmente los dolores.
+- Lo que la reunión NO diga se marca como [TBD: qué falta] — NUNCA lo inventes
+  (presupuestos, plazos, nombres, alcances no discutidos).
+- Después del borrador, lista en un bloque final las preguntas abiertas que el usuario
+  debe responder para cerrar cada [TBD].
+- Tono profesional y cercano, en español.
+
+== SECCIONES DEL BORRADOR ==
+1. Contexto y objetivo — quién es el cliente y qué busca (apóyate en el resumen).
+2. Necesidades detectadas — cada dolor con su cita literal de la transcripción.
+3. Solución propuesta — SOLO lo que se discutió en la reunión; no añadas alcance nuevo.
+4. Alcance por fases — divide la solución en fases entregables.
+5. Cronograma — [TBD si no se hablaron fechas].
+6. Inversión — [TBD: presupuesto no mencionado en la reunión] salvo que se dijera cifra.
+7. Supuestos y fuera de alcance — lo que explícitamente quedó fuera o se pospuso.
+8. Próximos pasos — incluye la próxima reunión si se acordó.
+
+== HUECOS TÍPICOS A PREGUNTAR TRAS EL BORRADOR ==
+- ¿Presupuesto orientativo u horquilla? · ¿Plazo o fecha objetivo? · ¿Quién decide/firma?
+- ¿Formato de entrega de la propuesta (PDF, página de Notion, email)?
+"""
+
+
+@mcp.tool
+def guiar_propuesta(
+    id: Annotated[
+        str | None,
+        Field(description="Id de la reunión (de listar_reuniones). Vacío = la más reciente."),
+    ] = None,
+    tipo: Annotated[
+        str,
+        Field(description="Tipo de propuesta: 'servicios' (por defecto), 'producto', 'formación'…"),
+    ] = "servicios",
+) -> str:
+    """Prepara el expediente para redactar un BORRADOR de propuesta comercial a partir de una
+    reunión: contenido de la reunión + participantes detectados + plantilla con instrucciones
+    de extracción por sección y reglas anti-invención. Úsala cuando el usuario pida una
+    propuesta, presupuesto u oferta basada en una reunión."""
+    contenido = _leer_fuente(id)
+    participantes = _participantes(contenido)
+    cabecera = [
+        "EXPEDIENTE DE PROPUESTA — generado desde la reunión",
+        f"PARTICIPANTES DETECTADOS: {', '.join(participantes) if participantes else '(no identificados — pregunta al usuario)'}",
+        "",
+        PLANTILLA_PROPUESTA.format(tipo=tipo),
+        "== CONTENIDO DE LA REUNIÓN ==",
+        contenido,
+    ]
+    return "\n".join(cabecera)
+
+
+@mcp.prompt
+def propuesta(id_reunion: str = "") -> str:
+    """Receta: borrador de propuesta comercial a partir de una reunión."""
+    objetivo = f"la reunión con id {id_reunion}" if id_reunion else "la última reunión"
+    return (
+        f"Llama a la herramienta guiar_propuesta de invisible-pm sobre {objetivo} y sigue sus "
+        "instrucciones al pie de la letra: redacta el borrador completo de propuesta en markdown, "
+        "marca como [TBD] todo lo que la reunión no diga, y termina con las preguntas abiertas "
+        "que necesito responder para cerrar la propuesta."
+    )
+
+
+# ════════════════════════════════════════════════════════════════════════
 # NOTION — el archivo
 # ════════════════════════════════════════════════════════════════════════
 
