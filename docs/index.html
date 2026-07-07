@@ -646,12 +646,17 @@ leer_reunion({ "id": "3ec43a28…" })   // una concreta</code></pre>
     <article class="paso">
       <div class="paso-head"><h3>2.1 · Crear el repo vacío en GitHub</h3><span class="tiempo">1 min</span></div>
       <div class="paso-body">
-        <pre><code>gh repo create jesusperezdeveloper/invisible_pm --public --clone
-cd invisible_pm
-# (o desde github.com → New repository → invisible_pm → git clone)</code></pre>
+        <pre><code>gh repo create jesusperezdeveloper/invisible-pm-live --public --clone
+cd invisible-pm-live
+# (o desde github.com → New repository → git clone)</code></pre>
         <ul class="checks">
-          <li><label><input type="checkbox" data-k="f2r-repo"><span>Repo <code>invisible_pm</code> creado y clonado (el del ensayo, borrado antes de la clase)</span></label></li>
+          <li><label><input type="checkbox" data-k="f2r-repo"><span>Repo del directo creado y clonado — <b>con nombre nuevo</b> (p. ej. <code>invisible-pm-live</code>)</span></label></li>
         </ul>
+        <p><b>⚠️ No reutilices el nombre <code>invisible_pm</code>:</b> ese repo es la red de seguridad — guarda la
+        versión probada del MCP (plan B), el tracking del ensayo y esta misma guía (GitHub Pages). Si lo borras
+        para renacerlo en directo, pierdes las tres cosas en el minuto 55. El nacimiento en vivo con otro nombre
+        tiene el mismo efecto didáctico y cero riesgo. Recuerda también <b>copiar el <code>.env</code></b> del
+        repo del ensayo al nuevo — las llaves no se regeneran, se reutilizan.</p>
       </div>
       <div class="pq-grid">
         <div class="pq"><div class="t">Por qué</div><p>El proyecto vive versionado desde el minuto 0: cada paso de la clase es un commit que los alumnos pueden reproducir después. El repo ES el material de la clase.</p></div>
