@@ -10,13 +10,13 @@ Backend spec-driven **FreeForm** del SpecBox Engine (board `ff-7c307a263348`).
 | UC | Nombre | Estado | ACs |
 |---|---|---|---|
 | UC-001 | Scaffolding del servidor MCP | ✅ done | 3/3 |
-| UC-002 | Herramienta listar_reuniones | 🔍 review | 2/4 |
-| UC-003 | Herramienta leer_reunion | 🔍 review | 1/3 |
+| UC-002 | Herramienta listar_reuniones | 🔍 review | 3/4 |
+| UC-003 | Herramienta leer_reunion | ✅ done | 3/3 |
 | UC-004 | Registro en Claude Code y documentación | ✅ done | 3/3 |
 
-Los UCs en **review** tienen pendientes solo los ACs que exigen una llamada real a la API de
-Fireflies con `FIREFLIES_API_KEY` válida (UC-002: AC-01, AC-04 · UC-003: AC-01, AC-02).
-Probar la víspera con la clave real y marcar con `mark_ac_batch`.
+Único AC pendiente: **UC-002 AC-04** (cuenta sin reuniones → mensaje informativo). No
+verificable con esta cuenta porque ya tiene reuniones; el camino de código existe y está
+revisado. Verificable solo con una cuenta Fireflies vacía.
 
 ## Evidencias registradas
 
@@ -25,7 +25,14 @@ Probar la víspera con la clave real y marcar con `mark_ac_batch`.
   Confirmación de arranque por stderr, stdout limpio.
 - **UC-002:** `limite=99` rechazado por zod (error -32602, max 25); default 5 aplicado.
   Sin API key → "Falta la clave de Fireflies… Settings → Developer settings → API key" (isError).
-- **UC-003:** Con clave inválida, Fireflies responde HTTP 200 + `errors` GraphQL; el servidor lo
+- **UC-002 (API real, 2026-07-07):** `listar_reuniones` devuelve las reuniones reales de la
+  cuenta con id, título, fecha es-ES y duración en minutos.
+- **UC-003 (API real, 2026-07-07):** `leer_reunion` sin id devuelve la última reunión completa
+  (resumen, puntos de acción, transcripción con hablantes); con id explícito devuelve esa misma
+  reunión; con id inexistente devuelve "Transcript not found" limpio. **Bug corregido en el
+  ensayo:** el esquema de Fireflies usa `transcript(id:)`, no `transcript(transcriptId:)` — la
+  versión de respaldo también lo tenía y habría fallado en directo.
+- Con clave inválida, Fireflies responde HTTP 200 + `errors` GraphQL; el servidor lo
   convierte en mensaje claro, sin stack trace.
 - **UC-004:** README de `fireflies-mcp/` con instalación, registro (`claude mcp add … ruta absoluta`)
   y plan B con el MCP oficial remoto.

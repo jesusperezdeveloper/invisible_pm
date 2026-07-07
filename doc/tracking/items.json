@@ -122,7 +122,7 @@
     "id": "ac-23a356f8",
     "name": "[AC-01] AC-01: Devuelve id, título, fecha (formateada es-ES) y duración en minutos de las últimas reuniones",
     "description": "",
-    "state": "backlog",
+    "state": "done",
     "parent_id": "item-7359170d",
     "labels": [
       "AC"
@@ -132,7 +132,8 @@
       "ac_id": "AC-01",
       "tipo": "AC"
     },
-    "created_at": "2026-07-07T11:45:57.812549+00:00"
+    "created_at": "2026-07-07T11:45:57.812549+00:00",
+    "updated_at": "2026-07-07T12:15:00.000000+00:00"
   },
   {
     "id": "ac-0e3b4e20",
@@ -188,7 +189,7 @@
     "id": "item-89622364",
     "name": "UC-003: Herramienta leer_reunion",
     "description": "# UC-003: Herramienta leer_reunion\n\n**User Story:** US-01: MCP propio de Fireflies — El Project Manager invisible\n**Actor:** Claude Code (cliente MCP)\n**Horas estimadas:** 1.0\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: Con id devuelve resumen automático, puntos de acción y transcripción completa con el nombre de quien habla\n- AC-02: AC-02: Sin id devuelve la última reunión (transcripts limit 1 → transcript por id)\n- AC-03: AC-03: Errores de la API GraphQL (clave inválida, id inexistente) se devuelven como mensaje claro en español, nunca como stack trace\n\n## Contexto\nQuery GraphQL: transcript(transcriptId: $id) { id title date duration summary { overview action_items } sentences { speaker_name text } }.",
-    "state": "review",
+    "state": "done",
     "parent_id": "item-83cece70",
     "labels": [
       "UC",
@@ -206,13 +207,13 @@
     "created_at": "2026-07-07T11:45:57.812657+00:00",
     "external_source": "",
     "external_id": "",
-    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+    "updated_at": "2026-07-07T12:15:00.000000+00:00"
   },
   {
     "id": "ac-dcaff116",
     "name": "[AC-01] AC-01: Con id devuelve resumen automático, puntos de acción y transcripción completa con el nombre de quien habla",
     "description": "",
-    "state": "backlog",
+    "state": "done",
     "parent_id": "item-89622364",
     "labels": [
       "AC"
@@ -222,13 +223,14 @@
       "ac_id": "AC-01",
       "tipo": "AC"
     },
-    "created_at": "2026-07-07T11:45:57.812691+00:00"
+    "created_at": "2026-07-07T11:45:57.812691+00:00",
+    "updated_at": "2026-07-07T12:15:00.000000+00:00"
   },
   {
     "id": "ac-c7e15d34",
     "name": "[AC-02] AC-02: Sin id devuelve la última reunión (transcripts limit 1 → transcript por id)",
     "description": "",
-    "state": "backlog",
+    "state": "done",
     "parent_id": "item-89622364",
     "labels": [
       "AC"
@@ -238,7 +240,8 @@
       "ac_id": "AC-02",
       "tipo": "AC"
     },
-    "created_at": "2026-07-07T11:45:57.812707+00:00"
+    "created_at": "2026-07-07T11:45:57.812707+00:00",
+    "updated_at": "2026-07-07T12:15:00.000000+00:00"
   },
   {
     "id": "ac-870fc4a8",

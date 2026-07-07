@@ -99,7 +99,7 @@ server.tool(
     }
     const data = await fireflies(
       `query Transcript($id: String!) {
-        transcript(transcriptId: $id) {
+        transcript(id: $id) {
           id title date duration
           summary { overview action_items }
           sentences { speaker_name text }
