@@ -49,6 +49,24 @@ MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "
 MAX_TRANSCRIPCION = 20000  # caracteres; una reunión de 3h no debe inundar el contexto de Claude
 
 
+def _cargar_env() -> None:
+    """Carga las llaves del .env del root del repo, sin pisar las ya definidas.
+    Así el registro en Claude Code no necesita repetir cada -e cuando se añade una llave."""
+    env_path = AQUI.parent / ".env"
+    if not env_path.exists():
+        return
+    for linea in env_path.read_text().splitlines():
+        linea = linea.strip()
+        if not linea or linea.startswith("#") or "=" not in linea:
+            continue
+        clave, _, valor = linea.partition("=")
+        if clave.strip() and valor.strip():
+            os.environ.setdefault(clave.strip(), valor.strip())
+
+
+_cargar_env()
+
+
 def _fecha(ms) -> str:
     """Milisegundos epoch → '30 jun 2026, 17:00' (es-ES)."""
     if not ms:
