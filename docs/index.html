@@ -1,0 +1,1056 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>Guía de seguimiento · El PM invisible</title>
+<style>
+  /* Identidad PotenzIA_Plantilla: fondo casi negro con brillo cálido, dorado pálido D2C87B,
+     Georgia display, Calibri cuerpo, grises AAAAAA/777777. Tema oscuro comprometido. */
+  :root {
+    --bg: #0D0D0B;
+    --bg-glow: #16130C;
+    --panel: #161613;
+    --panel-2: #1C1C17;
+    --line: #2B2A22;
+    --gold: #D2C87B;
+    --gold-dim: #8F8757;
+    --gold-soft: rgba(210, 200, 123, 0.12);
+    --blanco: #FFFFFF;
+    --texto: #C9C7BD;
+    --gris: #AAAAAA;
+    --gris-2: #777777;
+    --ok: #9DC98F;
+    --ok-soft: rgba(157, 201, 143, 0.13);
+    --risk: #E0917B;
+    --risk-soft: rgba(224, 145, 123, 0.11);
+    --pend: #D2C87B;
+    --pend-soft: rgba(210, 200, 123, 0.12);
+    --code-bg: #0A0A08;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; background: var(--bg); color: var(--texto);
+    font: 16px/1.65 Calibri, "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px 96px; }
+
+  .eyebrow {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; text-wrap: balance; color: var(--blanco); font-weight: 400; }
+  h1 { font-size: clamp(32px, 5.4vw, 50px); line-height: 1.1; margin: 14px 0 16px; }
+  h1 em { font-style: normal; color: var(--gold); }
+  h2 { font-size: 27px; margin: 0 0 6px; }
+  h3 { font-size: 19px; margin: 0; }
+  .lede { font-size: 17.5px; color: var(--gris); max-width: 64ch; margin: 0; }
+  .lede strong { color: var(--blanco); font-weight: 600; }
+
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  code { background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; font-size: 0.86em; color: var(--gold); }
+  pre {
+    background: var(--code-bg); color: #DDD9C8; border: 1px solid var(--line); border-radius: 8px;
+    padding: 15px 17px; overflow-x: auto; font-size: 13px; line-height: 1.55; margin: 12px 0 0;
+  }
+  pre code { background: none; border: none; padding: 0; color: inherit; }
+
+  /* cabecera con constelación */
+  .hero { position: relative; padding: 64px 0 40px; overflow: hidden; }
+  #constelacion { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.9; }
+  .hero > div { position: relative; }
+  .stats { display: flex; flex-wrap: wrap; gap: 28px; margin-top: 30px; }
+  .stat .n { font-family: Georgia, serif; font-size: 38px; color: var(--gold); line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .l { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gris-2); margin-top: 6px; }
+
+  /* progreso global */
+  .progress-panel {
+    position: sticky; top: 0; z-index: 10; background: rgba(13, 13, 11, 0.94);
+    backdrop-filter: blur(4px); border-bottom: 1px solid var(--line); margin: 0 -24px; padding: 11px 24px;
+  }
+  .progress-row { max-width: 940px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+  .progress-row .label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: var(--gris-2); white-space: nowrap; }
+  .bar { flex: 1; height: 7px; background: var(--panel-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--line); }
+  .bar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 99px; transition: width .25s ease; }
+  .progress-row .num { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; color: var(--gold); white-space: nowrap; }
+  #btn-reset {
+    font: inherit; font-size: 12px; color: var(--gris-2); background: none; border: 1px solid var(--line);
+    border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  }
+  #btn-reset:hover, #btn-reset:focus-visible { color: var(--risk); border-color: var(--risk); outline: none; }
+  @media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+
+  /* pipeline */
+  .pipeline { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin-top: 22px; }
+  .pipe-box {
+    flex: 1 1 150px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 14px 12px; min-width: 150px;
+  }
+  .pipe-box .rol { font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+  .pipe-box .nombre { font-family: Georgia, serif; font-size: 18px; margin: 3px 0 5px; color: var(--blanco); }
+  .pipe-box .tool { font-size: 12px; color: var(--gris); }
+  .pipe-arrow { align-self: center; color: var(--gold-dim); font-size: 20px; padding: 0 2px; }
+  .marco-mcp { border: 1px solid var(--gold-dim); border-radius: 14px; padding: 20px; margin-top: 24px; background: linear-gradient(180deg, var(--gold-soft), transparent 55%); }
+  .marco-mcp .titulo-marco { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 2px; }
+  .marco-mcp .titulo-marco b { font-family: Georgia, serif; font-size: 20px; color: var(--gold); font-weight: 400; }
+  .marco-mcp .titulo-marco span { font-size: 13px; color: var(--gris); }
+
+  .antes-despues { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 26px; }
+  @media (max-width: 640px) { .antes-despues { grid-template-columns: 1fr; } }
+  .ad-col { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: var(--panel); }
+  .ad-col.despues { border-color: var(--gold-dim); background: linear-gradient(180deg, var(--gold-soft), var(--panel) 70%); }
+  .ad-col .tag { font-size: 10.5px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gris-2); }
+  .ad-col.despues .tag { color: var(--gold); }
+  .ad-col .big { font-family: Georgia, serif; font-size: 32px; margin: 6px 0 2px; color: var(--blanco); }
+  .ad-col ul { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--gris); }
+  .ad-col li { margin: 3px 0; }
+
+  .chip {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+    border-radius: 99px; padding: 3px 10px; white-space: nowrap; vertical-align: middle; border: 1px solid transparent;
+  }
+  .chip.ok { background: var(--ok-soft); color: var(--ok); border-color: rgba(157,201,143,.3); }
+  .chip.pend { background: var(--pend-soft); color: var(--pend); border-color: rgba(210,200,123,.3); }
+  .chip.clase { background: var(--panel-2); color: var(--gris); border-color: var(--line); }
+
+  /* fases — números grandes dorados como la plantilla ("01 · Título de Sección") */
+  .fase { margin-top: 64px; }
+  .fase-head { display: flex; align-items: flex-start; gap: 18px; border-bottom: 1px solid var(--gold-dim); padding-bottom: 14px; }
+  .fase-num {
+    font-family: Georgia, serif; font-size: 46px; line-height: 0.95; color: var(--gold);
+    min-width: 60px; font-variant-numeric: tabular-nums;
+  }
+  .fase-head .meta { flex: 1; }
+  .fase-head .sub { color: var(--gris); font-size: 14.5px; margin-top: 4px; max-width: 62ch; }
+  .fase-head .contador {
+    font-variant-numeric: tabular-nums; font-size: 12.5px; font-weight: 700; color: var(--gris);
+    border: 1px solid var(--line); border-radius: 99px; padding: 3px 10px; white-space: nowrap; margin-top: 6px;
+  }
+  .fase-head .contador.completa { color: var(--ok); border-color: rgba(157,201,143,.4); }
+
+  .paso { margin-top: 26px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); }
+  .paso-head { padding: 14px 18px 4px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+  .paso-head .tiempo { font-size: 12px; color: var(--gris-2); font-variant-numeric: tabular-nums; }
+  .paso-body { padding: 4px 18px 16px; }
+  .paso-body p { margin: 8px 0 0; font-size: 14px; color: var(--gris); max-width: 70ch; }
+  .paso-body p b, .paso-body li b { color: var(--texto); }
+
+  .checks { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .checks label {
+    display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer;
+    padding: 8px 10px; border-radius: 8px; background: var(--panel-2); color: var(--texto);
+  }
+  .checks label:hover { outline: 1px solid var(--gold-dim); }
+  .checks input { accent-color: #D2C87B; width: 16px; height: 16px; margin-top: 3px; flex: none; cursor: pointer; }
+  .checks input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .checks input:checked + span { color: var(--gris-2); text-decoration: line-through; text-decoration-color: var(--gold-dim); text-decoration-thickness: 1px; }
+  .checks .nota { display: block; font-size: 12px; color: var(--gris-2); margin-top: 2px; }
+
+  .pq-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); margin-top: 14px; }
+  @media (max-width: 640px) { .pq-grid { grid-template-columns: 1fr; } }
+  .pq, .sino { padding: 12px 18px 14px; font-size: 13px; }
+  .pq { border-right: 1px solid var(--line); }
+  @media (max-width: 640px) { .pq { border-right: none; border-bottom: 1px solid var(--line); } }
+  .pq .t, .sino .t { font-size: 10.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 4px; }
+  .pq .t { color: var(--gold); }
+  .sino { background: var(--risk-soft); }
+  .sino .t { color: var(--risk); }
+  .pq p, .sino p { margin: 0; color: var(--gris); }
+  .sino p { color: var(--texto); }
+
+  /* tarjetas de herramienta */
+  .tool-card { margin-top: 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden; }
+  .tool-head { padding: 16px 18px 10px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+  .tool-head code.nombre-tool { font-size: 16px; background: none; border: none; padding: 0; color: var(--gold); }
+  .tool-head .servicio { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris-2); font-weight: 700; }
+  .tool-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 720px) { .tool-grid { grid-template-columns: 1fr; } }
+  .tool-cell { padding: 12px 18px 14px; font-size: 13.5px; border-top: 1px solid var(--line); }
+  .tool-cell:first-child, .tool-cell:nth-child(2) { border-top: none; }
+  @media (max-width: 720px) { .tool-cell:nth-child(2) { border-top: 1px solid var(--line); } }
+  .tool-cell:nth-child(odd) { border-right: 1px solid var(--line); }
+  @media (max-width: 720px) { .tool-cell:nth-child(odd) { border-right: none; } }
+  .tool-cell .t { font-size: 10.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
+  .tool-cell p { margin: 0 0 6px; color: var(--gris); }
+  .tool-cell p:last-child { margin-bottom: 0; }
+  .tool-cell b { color: var(--texto); }
+  .tool-cell ul { margin: 4px 0 0; padding-left: 17px; color: var(--gris); }
+  .tool-cell li { margin: 3px 0; }
+  .tool-invoca { padding: 12px 18px 16px; border-top: 1px solid var(--line); background: var(--panel-2); font-size: 13.5px; }
+  .tool-invoca .t { font-size: 10.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  .tool-invoca .frase { color: var(--texto); font-style: italic; }
+
+  /* tablas */
+  .tabla-scroll { overflow-x: auto; margin-top: 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 560px; }
+  th { text-align: left; font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gris-2); border-bottom: 1px solid var(--gold-dim); padding: 8px 10px; }
+  td { border-bottom: 1px solid var(--line); padding: 9px 10px; vertical-align: top; color: var(--gris); }
+  td b { color: var(--texto); }
+
+  .crono { list-style: none; margin: 18px 0 0; padding: 0; }
+  .crono li { display: grid; grid-template-columns: 92px 1fr; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .crono .min { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--gold); font-size: 14px; }
+  .crono .que b { font-family: Georgia, serif; font-size: 16px; color: var(--blanco); font-weight: 400; }
+  .crono .que span { display: block; font-size: 13px; color: var(--gris); }
+
+  .gotcha { border-left: 3px solid var(--gold); background: var(--panel); border-radius: 0 10px 10px 0; padding: 13px 16px; margin-top: 16px; font-size: 13.5px; }
+  .gotcha b { font-family: Georgia, serif; color: var(--gold); font-weight: 400; }
+  .gotcha p { margin: 4px 0 0; color: var(--gris); }
+
+  footer { margin-top: 72px; border-top: 1px solid var(--line); padding-top: 16px; font-size: 12.5px; color: var(--gris-2); }
+  a { color: var(--gold); }
+</style>
+
+<header class="hero">
+  <canvas id="constelacion" aria-hidden="true"></canvas>
+  <div class="wrap" style="padding-bottom:0;">
+    <p class="eyebrow">Masterclass PotenzIA · Documento de seguimiento</p>
+    <h1>El Project Manager <em>invisible</em></h1>
+    <p class="lede"><strong>El ejercicio:</strong> termina una reunión y un único prompt en Claude Code la convierte en <strong>acta en Notion</strong>, <strong>tarjetas en Trello</strong> con criterios de aceptación y <strong>la próxima reunión en Calendar</strong> — a través de <strong>un solo MCP propio</strong> (<code>invisible-pm</code>, Python + FastMCP) construido desde cero delante de la clase. Esta guía recorre todo: el repo, las llaves, cada herramienta por dentro, y qué se rompe si un paso se salta.</p>
+    <div class="stats">
+      <div class="stat"><div class="n">1</div><div class="l">MCP propio</div></div>
+      <div class="stat"><div class="n">5</div><div class="l">Herramientas</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">Acreditaciones</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">Prompt mágico</div></div>
+      <div class="stat"><div class="n">20–30<span style="font-size:20px;">min</span></div><div class="l">Recuperados por reunión</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="progress-panel">
+  <div class="progress-row">
+    <span class="label">Preparación</span>
+    <div class="bar" aria-hidden="true"><i id="bar-global"></i></div>
+    <span class="num" id="num-global">0/0</span>
+    <button id="btn-reset" type="button" title="Desmarca todos los pasos">Reiniciar</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ══════════ DEFINICIÓN ══════════ -->
+  <section class="fase" style="margin-top:44px;">
+    <p class="eyebrow">El problema que resuelve</p>
+    <h2>Un martes cualquiera, después de la reunión</h2>
+
+    <div class="antes-despues">
+      <div class="ad-col">
+        <span class="tag">Antes · a mano</span>
+        <div class="big">20–30 min</div>
+        <ul>
+          <li>Escuchar la grabación</li>
+          <li>Redactar el acta</li>
+          <li>Pegarla en Notion</li>
+          <li>Actualizar Trello tarjeta a tarjeta</li>
+          <li>Agendar la próxima reunión</li>
+          <li>× cada proyecto × cada semana · copia-pega, el error humano más repetido</li>
+        </ul>
+      </div>
+      <div class="ad-col despues">
+        <span class="tag">Después · con invisible-pm</span>
+        <div class="big">1 prompt</div>
+        <ul>
+          <li>Claude lee la reunión (Plaud o Fireflies)</li>
+          <li>Redacta el acta y la publica en Notion</li>
+          <li>Crea/mueve las tarjetas del tablón</li>
+          <li>Agenda la próxima reunión</li>
+          <li>Y te resume todo lo que ha hecho</li>
+          <li>La primera semana, un humano revisa todo: el control es parte del diseño</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="marco-mcp">
+      <div class="titulo-marco">
+        <b>invisible-pm</b>
+        <span>un MCP propio · FastMCP (Python) · las 4 acreditaciones dentro</span>
+      </div>
+      <div class="pipeline">
+        <div class="pipe-box">
+          <div class="rol">Los oídos · conmutables</div>
+          <div class="nombre">Plaud ⇄ Fireflies</div>
+          <div class="tool"><code>listar_reuniones</code> · <code>leer_reunion</code><br><span style="font-size:11px;">vía <code>FUENTE_REUNIONES</code></span></div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-box">
+          <div class="rol">El archivo</div>
+          <div class="nombre">Notion</div>
+          <div class="tool"><code>publicar_acta_notion</code></div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-box">
+          <div class="rol">El tablón</div>
+          <div class="nombre">Trello</div>
+          <div class="tool"><code>actualizar_trello</code></div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-box">
+          <div class="rol">La agenda</div>
+          <div class="nombre">Calendar</div>
+          <div class="tool"><code>agendar_reunion</code></div>
+        </div>
+      </div>
+      <p style="font-size:13px; color:var(--gris); margin:14px 0 0; max-width:72ch;">
+        Claude Code es el cerebro: lee, redacta y decide. El MCP es la acreditación: le da exactamente
+        las cinco acciones que este flujo necesita, ni una más. ¿Y Zoom? Fuera del circuito a propósito —
+        Fireflies ya escucha la reunión. Simplificar también es diseñar.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════ LAS 5 HERRAMIENTAS POR DENTRO ══════════ -->
+  <section class="fase">
+    <div class="fase-head">
+      <div class="fase-num">§</div>
+      <div class="meta">
+        <h2>Las 5 herramientas, por dentro</h2>
+        <p class="sub">Cómo funciona la invocación: Claude solo ve el <b>nombre</b>, la <b>descripción</b> y el <b>esquema de parámetros</b> de cada herramienta. Con eso decide cuál llamar y con qué argumentos; Claude Code ejecuta la llamada (con tu permiso), y el resultado vuelve a su contexto como texto. Por eso las descripciones están escritas en español claro: <b>la descripción ES la interfaz</b>.</p>
+      </div>
+    </div>
+
+    <!-- listar_reuniones -->
+    <article class="tool-card">
+      <div class="tool-head"><code class="nombre-tool">listar_reuniones(limite=5)</code><span class="servicio">Plaud CLI · Fireflies GraphQL</span></div>
+      <div class="tool-grid">
+        <div class="tool-cell">
+          <div class="t">Por qué existe en el MCP</div>
+          <p>Es el <b>punto de entrada</b>: sin ella Claude no sabe qué reuniones hay ni sus ids. Todo lo demás (leer, publicar, agendar) parte de aquí. Es también la herramienta de prueba perfecta tras el registro: barata, de solo lectura, imposible de romper nada.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Servicio que usa</div>
+          <p>Con <code>FUENTE_REUNIONES=plaud</code>: subprocess a <code>plaud files</code> (la CLI gestiona el token OAuth). Con <code>fireflies</code>: query GraphQL <code>transcripts(limit:)</code> con Bearer <code>FIREFLIES_API_KEY</code>.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Parámetros y validación</div>
+          <p><code>limite</code>: entero <b>1–25</b>, por defecto 5. Lo valida pydantic ANTES de tocar la API: <code>limite=99</code> se rechaza en la puerta. Una herramienta valida; un script confía.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Qué devuelve</div>
+          <p>Una línea por reunión: <code>• [id] título — fecha (duración)</code>. El id es la moneda de cambio: Claude lo copia tal cual para <code>leer_reunion</code>.</p>
+        </div>
+      </div>
+      <div class="tool-invoca">
+        <div class="t">Cómo la invoca Claude</div>
+        <p class="frase">"¿Qué reuniones tengo de esta semana?"</p>
+        <pre><code>listar_reuniones({ "limite": 10 })</code></pre>
+      </div>
+    </article>
+
+    <!-- leer_reunion -->
+    <article class="tool-card">
+      <div class="tool-head"><code class="nombre-tool">leer_reunion(id?)</code><span class="servicio">Plaud CLI · Fireflies GraphQL</span></div>
+      <div class="tool-grid">
+        <div class="tool-cell">
+          <div class="t">Por qué existe en el MCP</div>
+          <p>Es la <b>materia prima del acta</b>: resumen automático + transcripción con quién dijo qué. El <code>id</code> es opcional a propósito: "la última reunión" es el caso del prompt mágico, y así el prompt no necesita conocer ids. Diseñar la firma de la herramienta = diseñar la frase que la dispara.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Servicio que usa</div>
+          <p>Plaud: <code>plaud file</code> + <code>summary</code> + <code>transcript</code> (3 llamadas CLI). Fireflies: query <code>transcript(id:)</code> — <b>ojo: el argumento es <code>id</code>, no <code>transcriptId</code></b> (bug real cazado en el ensayo).</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Parámetros y límites</div>
+          <p><code>id</code> opcional (de <code>listar_reuniones</code>; vacío = la más reciente). La transcripción se <b>trunca a 20.000 caracteres</b>: tu reunión real de 3h13m habría metido 170 KB en el contexto de Claude.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Qué devuelve</div>
+          <p>Bloques etiquetados: <code>REUNIÓN / FECHA · DURACIÓN / RESUMEN AUTOMÁTICO / TRANSCRIPCIÓN</code>. Etiquetas estables = Claude extrae asistentes, decisiones y tareas sin ambigüedad.</p>
+        </div>
+      </div>
+      <div class="tool-invoca">
+        <div class="t">Cómo la invoca Claude</div>
+        <p class="frase">"Lee la última reunión…" (paso 0 del prompt mágico)</p>
+        <pre><code>leer_reunion({})            // sin id → la última
+leer_reunion({ "id": "3ec43a28…" })   // una concreta</code></pre>
+      </div>
+    </article>
+
+    <!-- publicar_acta_notion -->
+    <article class="tool-card">
+      <div class="tool-head"><code class="nombre-tool">publicar_acta_notion(titulo, contenido_markdown, pagina_padre="Proyectos")</code><span class="servicio">Notion REST API</span></div>
+      <div class="tool-grid">
+        <div class="tool-cell">
+          <div class="t">Por qué existe en el MCP</div>
+          <p><b>Claude redacta, pero necesita un brazo que archive.</b> La división del trabajo es la lección: el LLM produce el acta en markdown (lo que mejor sabe hacer) y la herramienta la convierte en página de Notion. Ni el LLM toca la API, ni la herramienta redacta.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Servicio que usa</div>
+          <p>API REST de Notion (<code>Notion-Version 2022-06-28</code>): <code>/v1/search</code> para localizar la página padre por nombre y <code>/v1/pages</code> para crear el acta. Auth: token de <b>integración interna</b> (<code>NOTION_API_KEY</code>) — solo ve páginas compartidas con ella.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">El detalle técnico que enseña</div>
+          <p>Notion <b>no acepta markdown</b>: la herramienta traduce a bloques (encabezados, listas, to-dos, negritas) y los envía en tandas de 100, que es el máximo por petición. Ese "adaptador invisible" es la mitad del valor de un MCP propio.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Qué devuelve / errores típicos</div>
+          <p>La <b>URL de la página creada</b> (se usa luego en la descripción del evento de Calendar). Error estrella: <i>"No encuentro ninguna página 'Proyectos'"</i> = falta compartir la página con la integración (<code>···</code> → Conexiones).</p>
+        </div>
+      </div>
+      <div class="tool-invoca">
+        <div class="t">Cómo la invoca Claude</div>
+        <p class="frase">Paso 1 del prompt mágico: "Crea el acta en Notion dentro de Proyectos/ReservaFácil…"</p>
+        <pre><code>publicar_acta_notion({
+  "titulo": "Acta — ReservaFácil, 8 jul 2026",
+  "contenido_markdown": "## Asistentes\n- Valen\n- Voluntario\n\n## Decisiones\n- MVP sin pagos online…",
+  "pagina_padre": "ReservaFácil"
+})</code></pre>
+      </div>
+    </article>
+
+    <!-- actualizar_trello -->
+    <article class="tool-card">
+      <div class="tool-head"><code class="nombre-tool">actualizar_trello(nuevas_tarjetas, completadas, tablero="ReservaFácil")</code><span class="servicio">Trello REST API</span></div>
+      <div class="tool-grid">
+        <div class="tool-cell">
+          <div class="t">Por qué existe en el MCP</div>
+          <p>Separa <b>decidir de ejecutar</b>: Claude extrae de la conversación qué tareas nacen y cuáles murieron; la herramienta hace el CRUD. Los criterios de aceptación como <b>checklist</b> convierten cada tarjeta en una definición de hecho visible — la diferencia entre "apuntar tareas" y gestionar.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Servicio que usa</div>
+          <p>API REST de Trello con <code>TRELLO_API_KEY</code> + <code>TRELLO_TOKEN</code>: resuelve el tablero por nombre, crea tarjetas en "Por hacer" (<code>/1/cards</code>), añade el checklist "Criterios de aceptación" (<code>/1/checklists</code>) y mueve a "Hecho" (<code>PUT /1/cards</code>).</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Parámetros (estructurados)</div>
+          <ul>
+            <li><code>nuevas_tarjetas</code>: lista de {titulo, responsable, criterios[], vencimiento} — el responsable va al título de la tarjeta</li>
+            <li><code>completadas</code>: títulos (o parte) → coincidencia parcial, sin exigir el nombre exacto</li>
+            <li><code>tablero</code>: por defecto "ReservaFácil"</li>
+          </ul>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Qué devuelve / errores típicos</div>
+          <p>Resumen línea a línea (✚ creada / ✔ movida / ⚠ no encontrada) + URL del tablero para la verificación en vivo. Si el tablero no existe, el error <b>lista los tableros disponibles</b>: el error como guía, no como castigo.</p>
+        </div>
+      </div>
+      <div class="tool-invoca">
+        <div class="t">Cómo la invoca Claude</div>
+        <p class="frase">Paso 2 del prompt mágico: "…una tarjeta por cada tarea nueva, con los criterios como checklist…"</p>
+        <pre><code>actualizar_trello({
+  "nuevas_tarjetas": [{
+    "titulo": "Maqueta de la pantalla de reserva",
+    "responsable": "Ana",
+    "criterios": ["Se ve el hueco libre de cada profesor", "Máximo 3 toques para reservar"],
+    "vencimiento": "2026-07-11"
+  }],
+  "completadas": ["Pantalla de login"]
+})</code></pre>
+      </div>
+    </article>
+
+    <!-- agendar_reunion -->
+    <article class="tool-card">
+      <div class="tool-head"><code class="nombre-tool">agendar_reunion(titulo, inicio, duracion_minutos=60, descripcion, invitados)</code><span class="servicio">Google Calendar API v3</span></div>
+      <div class="tool-grid">
+        <div class="tool-cell">
+          <div class="t">Por qué existe en el MCP</div>
+          <p><b>Cierra el ciclo.</b> La reunión agendada hoy es la que el pipeline procesará el jueves: el PM invisible se realimenta. Y lleva el enlace al acta en la descripción — cada eslabón referencia al anterior.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Servicio que usa</div>
+          <p>Google Calendar API v3 (<code>events.insert</code> en el calendario primary, zona <code>Europe/Madrid</code>). Auth OAuth de escritorio: <code>autorizar_google.py</code> se ejecuta UNA vez (navegador) y deja <code>token.json</code>; el MCP lo refresca solo, sin volver a preguntar.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Parámetros y validación</div>
+          <p><code>inicio</code> en ISO (<code>2026-07-09T12:00</code>) — si Claude manda otra cosa, el error enseña el formato con ejemplo. <code>duracion_minutos</code> 15–480 (default 60). <code>invitados</code>: emails opcionales.</p>
+        </div>
+        <div class="tool-cell">
+          <div class="t">Qué devuelve / errores típicos</div>
+          <p>El <code>htmlLink</code> del evento — lo que se abre en la verificación en vivo. Sin <code>token.json</code>: el error trae el comando exacto de autorización. La demo degrada con elegancia, no revienta.</p>
+        </div>
+      </div>
+      <div class="tool-invoca">
+        <div class="t">Cómo la invoca Claude</div>
+        <p class="frase">Paso 3 del prompt mágico: "Crea en Google Calendar la reunión del jueves a las 12:00 con el enlace al acta…"</p>
+        <pre><code>agendar_reunion({
+  "titulo": "Seguimiento ReservaFácil",
+  "inicio": "2026-07-09T12:00",
+  "duracion_minutos": 60,
+  "descripcion": "Acta: https://notion.so/Acta-ReservaFacil-…"
+})</code></pre>
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════ FASE 0 ══════════ -->
+  <section class="fase" data-fase="0">
+    <div class="fase-head">
+      <div class="fase-num">00</div>
+      <div class="meta">
+        <h2>Prerrequisitos <span class="chip clase">pre-work · alumnos</span></h2>
+        <p class="sub">Lo que cada asistente trae hecho de casa (~25 min). Sin esto solo puede mirar; con esto sale de clase con el sistema funcionando en su máquina.</p>
+      </div>
+      <span class="contador">0/7</span>
+    </div>
+
+    <article class="paso">
+      <div class="paso-head"><h3>0.1 · Herramientas en la máquina</h3><span class="tiempo">~12 min</span></div>
+      <div class="paso-body">
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f0-claude"><span>Claude Code instalado y con sesión iniciada (<code>claude</code> arranca)</span></label></li>
+          <li><label><input type="checkbox" data-k="f0-node"><span>Node.js ≥ 18 (<code>node -v</code>)<span class="nota">Para los MCP alternativos vía npx (plan B oficial de Fireflies) y el ecosistema de comunidad.</span></span></label></li>
+          <li><label><input type="checkbox" data-k="f0-uv"><span>uv instalado: <code>curl -LsSf https://astral.sh/uv/install.sh | sh</code><span class="nota">Gestiona Python y dependencias del MCP; no hace falta tener Python instalado.</span></span></label></li>
+          <li><label><input type="checkbox" data-k="f0-git"><span>git instalado y cuenta de GitHub (para el repo desde cero de la Fase 2)</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>La clase es 100 % práctica: la terminal es el aula. uv resuelve en un comando el clásico "en mi máquina no funciona el Python".</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>El alumno se convierte en espectador. En directo no hay tiempo de depurar instalaciones: se pierde el bloque entero.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>0.2 · Cuentas creadas</h3><span class="tiempo">~13 min</span></div>
+      <div class="paso-body">
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f0-fireflies"><span>Cuenta Fireflies (registro con Google)</span></label></li>
+          <li><label><input type="checkbox" data-k="f0-trello"><span>Cuenta Trello + tablero <b>Mi proyecto</b> con listas <i>Por hacer / En curso / Hecho</i> y 3 tarjetas reales</span></label></li>
+          <li><label><input type="checkbox" data-k="f0-notion"><span>Cuenta Notion + página <b>Proyectos</b> (vacía vale) · cuenta Google con Calendar</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>El sistema escribe en cuentas reales del alumno: el momento mágico solo emociona si las tarjetas aparecen en SU tablero.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>Los registros con verificación de email en vivo consumen 10-15 min de clase, y sin cuenta de Fireflies el alumno no tiene oídos: su pipeline no arranca.</p></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════ FASE 1 ══════════ -->
+  <section class="fase" data-fase="1">
+    <div class="fase-head">
+      <div class="fase-num">01</div>
+      <div class="meta">
+        <h2>Las llaves — credenciales de las 4 acreditaciones</h2>
+        <p class="sub">Cada servicio exige su llave. Sin llave no hay acceso — y eso es una característica de seguridad, no un fastidio. Todas viven en el <code>.env</code> del repo (gitignorado — ver Fase 2).</p>
+      </div>
+      <span class="contador">0/8</span>
+    </div>
+
+    <article class="paso">
+      <div class="paso-head"><h3>1.0 · Plaud — sesión de la CLI (la fuente por defecto)</h3><span class="tiempo">30 s</span><span class="chip ok">✓ autenticado 07/07</span></div>
+      <div class="paso-body">
+        <p>Los oídos por defecto del MCP son <b>Plaud</b>: decenas de reuniones reales ya procesadas, sin depender de que Fireflies digiera nada a tiempo. La CLI gestiona el token; el MCP la invoca por debajo.</p>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f1-plaud-login" data-done="1"><span><code>plaud login</code> ejecutado (OAuth en navegador, una vez)</span></label></li>
+          <li><label><input type="checkbox" data-k="f1-plaud-me"><span><b>1h antes de la clase:</b> <code>plaud me</code> responde con tu usuario (el token caduca — comprobarlo SIEMPRE)</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Contenido real mata contenido de laboratorio: la demo lee TUS reuniones. Y dos proveedores de oídos son doble red de seguridad.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>El token caducado es el fallo silencioso clásico: en el ensayo apareció caducado. El MCP lo detecta y pide <code>plaud login</code>, pero en directo son 2 min de OAuth delante de todos.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>1.1 · Fireflies — API key (fuente alternativa + camino de los alumnos)</h3><span class="tiempo">2 min</span><span class="chip ok">✓ hecha en el ensayo</span></div>
+      <div class="paso-body">
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f1-ff" data-done="1"><span>Fireflies → Settings → <b>Developer settings</b> → generar API key → <code>FIREFLIES_API_KEY</code> en el <code>.env</code></span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Es la llave de tus reuniones: acceso de lectura a transcripciones y resúmenes vía GraphQL. Los alumnos replican este camino (Plaud es hardware).</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>El ejercicio del cambio de oídos se queda sin destino y los alumnos sin camino replicable.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>1.2 · Trello — key + token</h3><span class="tiempo">3 min</span><span class="chip ok">✓ hecha en el ensayo</span></div>
+      <div class="paso-body">
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f1-trello" data-done="1"><span><a href="https://trello.com/power-ups/admin" rel="noopener">trello.com/power-ups/admin</a> → API key + token → <code>TRELLO_API_KEY</code> y <code>TRELLO_TOKEN</code> en el <code>.env</code></span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Trello no tiene MCP oficial; nuestro MCP habla con su API REST directamente. La pareja key+token identifica la app y autoriza tu cuenta.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p><code>actualizar_trello</code> falla: el acta se publica pero el tablón se queda desactualizado — exactamente el problema que vendemos resolver.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>1.3 · Notion — integración interna</h3><span class="tiempo">5 min</span><span class="chip pend">⏳ pendiente</span></div>
+      <div class="paso-body">
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f1-notion-int"><span>Crear integración interna en <a href="https://www.notion.so/my-integrations" rel="noopener">notion.so/my-integrations</a> → copiar el token → <code>NOTION_API_KEY</code> en el <code>.env</code></span></label></li>
+          <li><label><input type="checkbox" data-k="f1-notion-share"><span>En la página <b>Proyectos</b>: <code>···</code> → Conexiones → añadir tu integración<span class="nota">Este segundo paso es el que TODO el mundo olvida.</span></span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Las integraciones internas de Notion solo ven las páginas compartidas explícitamente con ellas: mínimo privilegio de serie.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>Sin token: error al publicar. Con token pero sin compartir: <i>"No encuentro ninguna página 'Proyectos'"</i> — el acta no tiene dónde nacer y el paso 1 del prompt mágico muere en directo.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>1.4 · Google Calendar — OAuth de escritorio</h3><span class="tiempo">~15 min</span><span class="chip pend">⏳ pendiente</span></div>
+      <div class="paso-body">
+        <p>El "oficial con fricción": Google no da API keys sueltas para Calendar; exige proyecto de Google Cloud y consentimiento OAuth. Se hace UNA vez y el token se renueva solo.</p>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f1-gcp"><span>Google Cloud Console → proyecto → habilitar <b>Google Calendar API</b></span></label></li>
+          <li><label><input type="checkbox" data-k="f1-cred"><span>Credenciales → ID de cliente OAuth tipo <b>Escritorio</b> → descargar <code>credentials.json</code> a <code>invisible-pm-mcp/</code></span></label></li>
+          <li><label><input type="checkbox" data-k="f1-auth"><span><code>cd invisible-pm-mcp && uv run autorizar_google.py</code> → navegador → aceptar → se guarda <code>token.json</code></span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>OAuth protege tu agenda: autorización tuya, revocable y con un único permiso (crear eventos). El script separa la autorización (interactiva, una vez) del servidor (headless, siempre).</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p><code>agendar_reunion</code> devuelve el error-guía con el comando exacto. La reunión del jueves no se agenda: el cierre del momento mágico queda cojo, y se agenda a mano — delante de todos.</p></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════ FASE 2 · REPO DESDE CERO ══════════ -->
+  <section class="fase" data-fase="2">
+    <div class="fase-head">
+      <div class="fase-num">02</div>
+      <div class="meta">
+        <h2>El repositorio — nacer bien, desde cero</h2>
+        <p class="sub">Toda aplicación nueva empieza igual: un repo vacío, una protección de secretos y un primer commit. Este paso se hace EN la clase, from scratch — el repo del ensayo se borra antes para que el nacimiento sea real.</p>
+      </div>
+      <span class="contador">0/5</span>
+    </div>
+
+    <article class="paso">
+      <div class="paso-head"><h3>2.1 · Crear el repo vacío en GitHub</h3><span class="tiempo">1 min</span></div>
+      <div class="paso-body">
+        <pre><code>gh repo create jesusperezdeveloper/invisible_pm --public --clone
+cd invisible_pm
+# (o desde github.com → New repository → invisible_pm → git clone)</code></pre>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f2r-repo"><span>Repo <code>invisible_pm</code> creado y clonado (el del ensayo, borrado antes de la clase)</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>El proyecto vive versionado desde el minuto 0: cada paso de la clase es un commit que los alumnos pueden reproducir después. El repo ES el material de la clase.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>El código queda en una carpeta suelta: sin historia, sin distribución a alumnos, sin vuelta atrás si algo se rompe en directo.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>2.2 · El .gitignore ANTES que ninguna otra cosa</h3><span class="tiempo">1 min</span></div>
+      <div class="paso-body">
+        <pre><code># .gitignore — la primera línea de defensa
+.env
+.env.*
+token.json
+credentials.json
+.venv/
+__pycache__/
+node_modules/
+.DS_Store</code></pre>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f2r-gitignore"><span><code>.gitignore</code> escrito y commiteado <b>antes</b> de crear el <code>.env</code></span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>El orden importa: si el <code>.gitignore</code> existe primero, es <b>estructuralmente imposible</b> commitear una llave por despiste. La seguridad por diseño se enseña con el orden de los comandos.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>La API key viaja en el primer push. Hay bots escaneando GitHub en tiempo real: una clave de Fireflies filtrada = cualquiera lee tus reuniones. Toca revocar, regenerar y reescribir historia — en directo, un desastre.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>2.3 · El .env con las llaves de la Fase 1</h3><span class="tiempo">2 min</span></div>
+      <div class="paso-body">
+        <pre><code># .env — las llaves del MCP (NUNCA se commitea)
+FIREFLIES_API_KEY=...
+TRELLO_API_KEY=...
+TRELLO_TOKEN=...
+NOTION_API_KEY=ntn_...
+# Plaud no necesita clave aquí: usa la sesión de `plaud login`
+# Google Calendar tampoco: usa credentials.json + token.json (gitignorados)</code></pre>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f2r-env"><span><code>.env</code> creado en el root con las llaves · <code>git status</code> <b>no</b> lo lista</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Un único lugar para todas las llaves, separado del código: el patrón que los alumnos deben llevarse a cualquier proyecto. Verificar con <code>git status</code> convierte la costumbre en reflejo.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>Llaves pegadas en el código o exportadas a mano en cada terminal: el registro del MCP (Fase 4) se vuelve frágil y las claves acaban en el historial de la shell o del repo.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>2.4 · Primer commit — el repo respira</h3><span class="tiempo">1 min</span></div>
+      <div class="paso-body">
+        <pre><code>git add .gitignore README.md
+git commit -m "invisible_pm: nace el proyecto (gitignore primero)"
+git push -u origin main</code></pre>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f2r-commit"><span>Primer commit pusheado (README de una línea vale: el punto es la historia)</span></label></li>
+          <li><label><input type="checkbox" data-k="f2r-specbox"><span><b>Solo instructor (opcional):</b> onboarding SpecBox para el tracking spec-driven US/UC/AC en <code>doc/tracking/</code><span class="nota">No es parte de la clase — es cómo el instructor versiona el avance del propio ejercicio.</span></span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Un primer commit mínimo establece el ritmo: commit pequeño, mensaje que cuenta una historia. Todo lo que Claude Code genere después se versiona paso a paso.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>El primer commit acaba siendo un volcado gigante de 40 ficheros sin narrativa — inservible como material didáctico y peligroso de revisar.</p></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════ FASE 3 · CONSTRUIR ══════════ -->
+  <section class="fase" data-fase="3">
+    <div class="fase-head">
+      <div class="fase-num">03</div>
+      <div class="meta">
+        <h2>Construir el MCP <span class="chip clase">Bloque 3 · en directo</span></h2>
+        <p class="sub">El giro épico: Claude Code programa su propia acreditación dentro del repo recién nacido. Construir un MCP es describir bien lo que quieres.</p>
+      </div>
+      <span class="contador">0/5</span>
+    </div>
+
+    <article class="paso">
+      <div class="paso-head"><h3>3.1 · El prompt de construcción</h3><span class="tiempo">1 min + ~10 de generación</span></div>
+      <div class="paso-body">
+        <p><b>Copiado del bloc de notas, jamás escrito en vivo.</b> Mientras Claude trabaja, se narra en lenguaje llano: "está escribiendo la herramienta de listar", "está definiendo qué parámetros acepta".</p>
+        <pre><code>Crea un servidor MCP en Python con FastMCP en la carpeta invisible-pm-mcp:
+el "Project Manager invisible". Herramientas:
+1. listar_reuniones(limite) y leer_reunion(id opcional): API GraphQL de
+   Fireflies (https://api.fireflies.ai/graphql, Bearer FIREFLIES_API_KEY).
+   leer_reunion devuelve resumen, puntos de acción y transcripción con
+   el nombre de quien habla; sin id, la última reunión.
+2. publicar_acta_notion(titulo, contenido_markdown, pagina_padre): crea la
+   página del acta en Notion (API REST, NOTION_API_KEY) y devuelve su URL.
+3. actualizar_trello(nuevas_tarjetas, completadas, tablero): tarjetas en
+   "Por hacer" con responsable en el título y criterios como checklist;
+   mueve a "Hecho" lo cerrado (TRELLO_API_KEY + TRELLO_TOKEN).
+4. agendar_reunion(titulo, inicio, duracion_minutos, descripcion): evento
+   en Google Calendar (OAuth con token.json).
+Usa FastMCP con dependencias gestionadas por uv (pyproject.toml).
+Mensajes de error claros en español que digan cómo conseguir cada llave.
+Dime al final el comando exacto de claude mcp add para registrarlo.</code></pre>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f2-prompt"><span>Prompt copiado en el bloc de notas, listo para pegar</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>El prompt ES la lección: el público no técnico ve que construir software con IA es especificar con precisión. Cada línea es una decisión de diseño (revisa la sección "Las 5 herramientas, por dentro").</p></div>
+        <div class="sino"><div class="t">Si no se hace (se improvisa)</div><p>Prompts vagos → herramientas vagas. Y teclear 20 líneas en directo son 3 minutos de silencio incómodo y erratas que luego cuestan depuración.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>3.2 · Instalar y arrancar limpio</h3><span class="tiempo">2 min</span><span class="chip ok">✓ ensayado</span></div>
+      <div class="paso-body">
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f2-uvsync" data-done="1"><span><code>cd invisible-pm-mcp && uv sync</code> sin errores (<code>.venv/</code> con Python 3.12 + FastMCP + cliente Google)</span></label></li>
+          <li><label><input type="checkbox" data-k="f2-arranque" data-done="1"><span><code>uv run server.py</code> muestra el banner por <b>stderr</b> y deja <b>stdout</b> intacto</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p><code>uv.lock</code> congela versiones: lo probado la víspera es byte a byte lo que corre en clase. Y en un MCP stdio, <b>stdout es el cable</b>: por ahí viaja el JSON-RPC; lo humano va por stderr.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>Dependencias distintas a las ensayadas ("ayer funcionaba"), o un <code>print()</code> en stdout que corrompe el protocolo: el servidor "no conecta" sin error obvio — el fallo #1 de MCPs caseros.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>3.3 · Batería de pruebas con llaves REALES</h3><span class="tiempo">5 min · la víspera</span><span class="chip ok">✓ hecha 07/07</span></div>
+      <div class="paso-body">
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f2-test-ff" data-done="1"><span>Oídos reales: <code>listar_reuniones</code> y <code>leer_reunion</code> con Plaud (reuniones de 11m y 3h13m) y con Fireflies (id, sin id, id inexistente)</span></label></li>
+          <li><label><input type="checkbox" data-k="f2-test-trello" data-done="1"><span>Trello real: tarjeta con responsable + checklist + vencimiento creada, movida a Hecho y limpiada</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>El test "de protocolo" sin llaves da falsa seguridad: valida el envoltorio, no la conversación con la API real.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>Caso real del ensayo: la query usaba <code>transcript(transcriptId:)</code> y pasó todos los tests sin clave. Contra la API real: error. Habría reventado el momento estrella en el minuto 75.</p></div>
+      </div>
+    </article>
+
+    <div class="gotcha">
+      <b>Gotchas cazados en el ensayo (munición para la depuración didáctica)</b>
+      <p>① Fireflies: el argumento es <code>transcript(id:)</code>, no <code>transcriptId</code> — el propio error de la API dice qué espera: 2 min de oro didáctico (a los 5, corta y usa la versión probada). ② Con clave inválida Fireflies responde HTTP 200 + array <code>errors</code>, no un 401. ③ Plaud: los errores de la CLI van marcados con <code>✗ [CÓDIGO]</code> — no busques "404" en la salida cruda: el <code>serial_number</code> de una reunión puede contenerlo (nos pasó). ④ La validación pydantic rechaza <code>limite=99</code> antes de tocar la API: enséñalo.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ FASE 4 · REGISTRO ══════════ -->
+  <section class="fase" data-fase="4">
+    <div class="fase-head">
+      <div class="fase-num">04</div>
+      <div class="meta">
+        <h2>Registrar la acreditación</h2>
+        <p class="sub">El MCP existe; ahora hay que colgárselo a Claude Code del cuello.</p>
+      </div>
+      <span class="contador">0/3</span>
+    </div>
+
+    <article class="paso">
+      <div class="paso-head"><h3>4.1 · <code>claude mcp add</code> con ruta absoluta</h3><span class="tiempo">1 min</span><span class="chip ok">✓ registrado</span></div>
+      <div class="paso-body">
+        <pre><code>claude mcp add invisible-pm \
+  -e FUENTE_REUNIONES=plaud \
+  -e FIREFLIES_API_KEY=... -e NOTION_API_KEY=... \
+  -e TRELLO_API_KEY=... -e TRELLO_TOKEN=... \
+  -- /ruta/absoluta/invisible-pm-mcp/.venv/bin/python \
+     /ruta/absoluta/invisible-pm-mcp/server.py</code></pre>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f3-add" data-done="1"><span>Registrado con <b>ruta absoluta</b> al python del venv (obtenla con <code>pwd</code>)</span></label></li>
+          <li><label><input type="checkbox" data-k="f3-restart"><span><b>Reiniciar la sesión</b> de Claude Code después de registrar</span></label></li>
+          <li><label><input type="checkbox" data-k="f3-list" data-done="1"><span><code>claude mcp list</code> → <code>invisible-pm ✓ Connected</code></span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Claude Code lanza el servidor como subproceso desde cualquier directorio: una ruta relativa se resuelve contra el sitio equivocado. Y las tools se cargan al arrancar la sesión, no en caliente.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>Ruta relativa → "spawn ENOENT" / servidor que nunca conecta. Sin reiniciar → "no veo la herramienta" y la falsa sensación de que el MCP está roto cuando solo está sin cargar.</p></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════ FASE 5 · ESCENARIO ══════════ -->
+  <section class="fase" data-fase="5">
+    <div class="fase-head">
+      <div class="fase-num">05</div>
+      <div class="meta">
+        <h2>Montar el escenario de la demo</h2>
+        <p class="sub">El proyecto ficticio <b>ReservaFácil</b> (app de reservas para autoescuelas) debe existir en los tres destinos antes de que el prompt escriba en ellos.</p>
+      </div>
+      <span class="contador">0/6</span>
+    </div>
+
+    <article class="paso">
+      <div class="paso-head"><h3>5.1 · El decorado en cada servicio</h3><span class="tiempo">10 min</span></div>
+      <div class="paso-body">
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f4-trello" data-done="1"><span>Tablero Trello <b>ReservaFácil</b> con <i>Por hacer / En curso / Hecho</i> y 4 tarjetas creíbles<span class="nota">✓ Creado en el ensayo: trello.com/b/hEKGi4Jq — login en Hecho, pagos atascados en En curso.</span></span></label></li>
+          <li><label><input type="checkbox" data-k="f4-notion"><span>Página Notion <b>Proyectos → ReservaFácil</b> con un acta antigua de ejemplo</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Un tablón con historia hace la demo creíble: se VE que el sistema entra en un proyecto vivo. Y el acta nueva junto a la antigua muestra continuidad.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>"Mover a Hecho" no tiene nada que mover, el acta cae en una página huérfana, y la audiencia ve un juguete en vez de su martes.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>5.2 · El contenido del gancho</h3><span class="tiempo">10 min · la víspera</span><span class="chip pend">⏳ pendiente</span></div>
+      <div class="paso-body">
+        <p>Con Plaud como fuente por defecto, el gancho del minuto 2 <b>ya tiene contenido garantizado</b>: tus reuniones reales. La pregrabada de ReservaFácil sigue siendo deseable para que la demo hable del proyecto ficticio y no de un cliente real.</p>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f4-pregrabada"><span>Reunión de 3 min sobre ReservaFácil grabada — con Plaud (directa) o Zoom + Fireflies invitado, <b>transcript ya procesado</b><span class="nota">Combo elegante: grabarla con Plaud y subir el audio también a Fireflies (dashboard → Upload) → la MISMA reunión en ambos proveedores para el ejercicio del cambio.</span></span></label></li>
+          <li><label><input type="checkbox" data-k="f4-txt"><span>Transcript exportado a <code>.txt</code> — plan B nuclear</span></label></li>
+          <li><label><input type="checkbox" data-k="f4-voluntario"><span>Voluntario elegido y avisado con su papel del guion de reunión</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Fireflies tarda de minutos a más de una hora en procesar. El truco de magia exige una reunión YA digerida; la reunión en vivo del minuto 8 (esa sí, con Fireflies en el Zoom) se procesa durante la clase y se cosecha al final.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>Sin pregrabada de ReservaFácil, el gancho usa una reunión real tuya: funciona, pero expone contenido de clientes en pantalla. Y sin el .txt, si TODO lo que escucha cae, no queda plan B con contenido.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>5.3 · El ejercicio del cambio de oídos</h3><span class="tiempo">3 min · remate del B3</span><span class="chip ok">✓ verificado</span></div>
+      <div class="paso-body">
+        <p>El MCP arranca escuchando por <b>Plaud</b>. En clase se re-registra con <code>-e FUENTE_REUNIONES=fireflies</code>, se reinicia la sesión, y el mismo prompt funciona contra Fireflies.</p>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f4-cambio" data-done="1"><span>Cambio verificado en el ensayo: ambas fuentes en verde con las mismas dos herramientas</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Es la tesis de la clase hecha demo: <i>"he cambiado los oídos sin tocar el archivo, el tablón ni la agenda"</i>. Una variable de entorno = un proveedor nuevo. Los alumnos replican el camino Fireflies (Plaud es hardware).</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>Se pierde el argumento más contundente a favor del MCP propio: el control sobre las costuras. La clase ve UN pipeline, no una arquitectura.</p></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════ FASE 6 · MOMENTO MÁGICO ══════════ -->
+  <section class="fase" data-fase="6">
+    <div class="fase-head">
+      <div class="fase-num">06</div>
+      <div class="meta">
+        <h2>El momento mágico <span class="chip clase">Bloque 4 · min 85–110</span></h2>
+        <p class="sub">La reunión sembrada al principio, ya procesada, se convierte en proyecto ordenado delante de todos.</p>
+      </div>
+      <span class="contador">0/4</span>
+    </div>
+
+    <article class="paso">
+      <div class="paso-head"><h3>6.1 · El prompt mágico</h3><span class="tiempo">se lee en voz alta ANTES de lanzarlo</span></div>
+      <div class="paso-body">
+        <pre><code>Lee la última reunión. Después:
+1. Crea el acta en Notion dentro de Proyectos/ReservaFácil: fecha, asistentes,
+   decisiones tomadas, tareas con responsable y fecha, y próximos pasos.
+2. En el tablero Trello ReservaFácil: crea una tarjeta en "Por hacer" por cada
+   tarea nueva, con el responsable en el título y los criterios de aceptación
+   como checklist. Si algo se dio por cerrado en la reunión, muévelo a "Hecho".
+3. Crea en Google Calendar la reunión acordada para el jueves a las 12:00
+   con el enlace al acta en la descripción.
+Cuando termines, resume todo lo que has hecho.</code></pre>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f5-prompt"><span>Prompt mágico copiado en el bloc de notas</span></label></li>
+          <li><label><input type="checkbox" data-k="f5-e2e"><span><b>Ensayo general E2E</b> ejecutado la víspera con las 4 llaves puestas (el único AC gordo que queda abierto en el tracking)</span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Leerlo en voz alta lo convierte en guion compartido: la audiencia sabe qué esperar y puede verificar que ocurrió. El E2E de víspera es el único test que ejercita el acta completa markdown→Notion con contenido real.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>Sin E2E previo, la clase ES el primer test de integración del pipeline. Todo está verde por separado; los fallos que quedan viven justo en las costuras.</p></div>
+      </div>
+    </article>
+
+    <article class="paso">
+      <div class="paso-head"><h3>6.2 · Verificación en vivo + aterrizaje</h3><span class="tiempo">min 88–108</span></div>
+      <div class="paso-body">
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="f5-verif"><span>Navegación anunciada: Notion (acta) → Trello (tarjetas con checklist) → Calendar (jueves 12:00). El voluntario confirma que SUS tareas están bien recogidas</span></label></li>
+          <li><label><input type="checkbox" data-k="f5-negocio"><span>Cifra de negocio: 20–30 min/reunión × proyectos × semanas + el matiz: <b>la primera semana un humano revisa todo</b></span></label></li>
+        </ul>
+      </div>
+      <div class="pq-grid">
+        <div class="pq"><div class="t">Por qué</div><p>Narrar cada llamada ("acaba de pedir el transcript… ahora escribe en Notion… acreditación por acreditación") es la anatomía del MCP contada en tiempo real. La validación humana no es un descargo: es diseño responsable.</p></div>
+        <div class="sino"><div class="t">Si no se hace</div><p>Sin verificación visible, la demo parece trucada. Sin el matiz del control humano, alguien automatiza actas de clientes el lunes y descubre las alucinaciones el martes.</p></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════ PLAN B ══════════ -->
+  <section class="fase" data-fase="7">
+    <div class="fase-head">
+      <div class="fase-num">B</div>
+      <div class="meta">
+        <h2>Plan B por capas</h2>
+        <p class="sub">Interiorizado, no leído. Regla: 2–3 min de depuración en vivo son oro didáctico; a los 5, se corta y se cambia de capa.</p>
+      </div>
+      <span class="contador">0/3</span>
+    </div>
+    <div class="tabla-scroll">
+      <table>
+        <thead><tr><th>Si falla…</th><th>Se cambia a…</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td>El código generado en vivo</td><td>La versión probada del repo: <code>invisible-pm-mcp/server.py</code> (y de reserva, la Node solo-Fireflies en <code>doc/masterclass/fireflies-mcp/</code>)</td><td><span class="chip ok">ambas probadas API real</span></td></tr>
+          <tr><td>Fireflies (o su API)</td><td><code>FUENTE_REUNIONES=plaud</code> → siguen ahí TODAS tus reuniones reales. Y al revés: si Plaud caduca, <code>fireflies</code>. Dos oídos = doble red</td><td><span class="chip ok">✓ ambos verificados</span></td></tr>
+          <tr><td>Queriendo enseñar el oficial</td><td>MCP oficial remoto: <code>claude mcp add fireflies-oficial -- npx mcp-remote https://api.fireflies.ai/mcp --header "Authorization: Bearer TU_KEY"</code></td><td><span class="chip clase">comando listo</span></td></tr>
+          <tr><td>TODO lo que escucha</td><td>El <code>.txt</code> exportado la víspera: "lee este archivo como si fuera el transcript" — el resto del flujo sigue intacto</td><td><span class="chip pend">⏳ exportar</span></td></tr>
+          <tr><td>La reunión del B0 no está procesada al llegar al B4</td><td>Usar la pregrabada de la víspera (ya procesada); la de clase "os la enseño al final si da tiempo"</td><td><span class="chip pend">⏳ requiere 5.2</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="checks" style="margin-top:14px;">
+      <li><label><input type="checkbox" data-k="fb-1" data-done="1"><span>Capa 1 lista: versión probada en el repo y comprobada contra las APIs reales</span></label></li>
+      <li><label><input type="checkbox" data-k="fb-2"><span>Capa 2 lista: comando del MCP oficial con la key a mano</span></label></li>
+      <li><label><input type="checkbox" data-k="fb-3"><span>Capa 3 lista: .txt del transcript en el escritorio</span></label></li>
+    </ul>
+  </section>
+
+  <!-- ══════════ CRONOGRAMA ══════════ -->
+  <section class="fase">
+    <div class="fase-head">
+      <div class="fase-num">⏱</div>
+      <div class="meta">
+        <h2>Cronograma de la clase</h2>
+        <p class="sub">120 min por Zoom. Cada cambio de pantalla se anuncia: "ahora me veis la terminal".</p>
+      </div>
+    </div>
+    <ul class="crono">
+      <li><span class="min">0–12</span><div class="que"><b>B0 · El gancho</b><span>Truco de magia con la reunión pregrabada + sembrar la reunión en vivo con el voluntario (Fireflies invitado). Compra ~75 min de procesamiento.</span></div></li>
+      <li><span class="min">12–30</span><div class="que"><b>B1 · Qué es un MCP</b><span>Analogía de la acreditación + demo del dolor cronometrada a mano (3 min para UNA tarea).</span></div></li>
+      <li><span class="min">30–55</span><div class="que"><b>B2 · Las 4 acreditaciones + tabla de decisión</b><span>Oficial si existe y te vale → comunidad revisada → propio cuando necesitas control. La pregunta profesional: ¿a quién le doy mis llaves?</span></div></li>
+      <li><span class="min">55–85</span><div class="que"><b>B3 · Repo desde cero + construir invisible-pm</b><span>Nace el repo (gitignore primero), prompt de construcción, registro, prueba, y el ejercicio del cambio de oídos. Debe aparecer la reunión del B0 procesada.</span></div></li>
+      <li><span class="min">85–110</span><div class="que"><b>B4 · El momento mágico</b><span>Prompt mágico → acta + tarjetas + evento, verificados en vivo con el voluntario. Cifra de negocio + control humano.</span></div></li>
+      <li><span class="min">110–120</span><div class="que"><b>B5 · Ejercicio de cierre</b><span>Cada alumno escribe su stack: 2 MCPs que conectaría + 1 MCP propio que le falta (nombre + sus 2-3 herramientas exactas).</span></div></li>
+    </ul>
+  </section>
+
+  <!-- ══════════ ESTADO ══════════ -->
+  <section class="fase">
+    <div class="fase-head">
+      <div class="fase-num">✓</div>
+      <div class="meta">
+        <h2>Estado del ensayo (07/07/2026)</h2>
+        <p class="sub">Tracking spec-driven en el repo (<code>doc/tracking/</code>, SpecBox FreeForm): 2 US · 9 UC · 25/29 ACs verificados.</p>
+      </div>
+    </div>
+    <div class="tabla-scroll">
+      <table>
+        <thead><tr><th>Pieza</th><th>Verificación</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td><b>Plaud</b> (fuente por defecto)</td><td>Reuniones reales (11m y 3h13m) vía CLI; truncado a 20k; sesión caducada → mensaje-guía</td><td><span class="chip ok">✓ verde</span></td></tr>
+          <tr><td><b>Fireflies</b> (<code>listar</code>/<code>leer</code>)</td><td>Batería contra API real; bug <code>transcript(id:)</code> cazado y corregido; conmutación verificada</td><td><span class="chip ok">✓ verde</span></td></tr>
+          <tr><td><b>Trello</b> (<code>actualizar_trello</code>)</td><td>Tarjeta real con checklist + vencimiento, movida a Hecho, limpiada; tablero demo creado</td><td><span class="chip ok">✓ verde</span></td></tr>
+          <tr><td><b>Notion</b> (<code>publicar_acta_notion</code>)</td><td>Código listo; error-guía verificado</td><td><span class="chip pend">⏳ falta token (paso 1.3)</span></td></tr>
+          <tr><td><b>Calendar</b> (<code>agendar_reunion</code>)</td><td>Código listo; error-guía verificado</td><td><span class="chip pend">⏳ falta OAuth (paso 1.4)</span></td></tr>
+          <tr><td><b>Registro</b> <code>invisible-pm</code></td><td><code>claude mcp list</code> → ✓ Connected (con <code>FUENTE_REUNIONES=plaud</code>)</td><td><span class="chip ok">✓ verde</span></td></tr>
+          <tr><td><b>Demo E2E</b> (prompt mágico)</td><td>Pendiente de 1.3 + 1.4 — el ensayo general</td><td><span class="chip pend">⏳ paso 6.1</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Repo: <b>github.com/jesusperezdeveloper/invisible_pm</b> · MCP: <code>invisible-pm-mcp/server.py</code> (FastMCP) ·
+    Guion completo: <code>doc/masterclass/guion-masterclass-mcp.md</code> · Los checks se guardan en este navegador.
+  </footer>
+</div>
+
+<script>
+  // Constelación dorada al estilo de la plantilla PotenzIA (determinista, sutil)
+  (function () {
+    var canvas = document.getElementById("constelacion");
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext("2d");
+    function seeded(s) { return function () { s |= 0; s = (s + 0x6D2B79F5) | 0; var t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+    function pintar() {
+      var w = canvas.clientWidth, h = canvas.clientHeight, dpr = window.devicePixelRatio || 1;
+      canvas.width = w * dpr; canvas.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      // brillo cálido inferior
+      var g = ctx.createRadialGradient(w * 0.55, h * 1.15, 0, w * 0.55, h * 1.15, h * 1.1);
+      g.addColorStop(0, "rgba(90, 75, 30, 0.28)"); g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      var rnd = seeded(2026), nodos = [];
+      for (var i = 0; i < 34; i++) nodos.push({ x: rnd() * w, y: h * 0.45 + rnd() * h * 0.55, r: 1 + rnd() * 2 });
+      ctx.strokeStyle = "rgba(210, 200, 123, 0.10)"; ctx.lineWidth = 0.7;
+      for (var a = 0; a < nodos.length; a++) for (var b = a + 1; b < nodos.length; b++) {
+        var dx = nodos[a].x - nodos[b].x, dy = nodos[a].y - nodos[b].y;
+        if (dx * dx + dy * dy < 150 * 150) { ctx.beginPath(); ctx.moveTo(nodos[a].x, nodos[a].y); ctx.lineTo(nodos[b].x, nodos[b].y); ctx.stroke(); }
+      }
+      nodos.forEach(function (n) {
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, 7); ctx.fillStyle = "rgba(210, 200, 123, 0.35)"; ctx.fill();
+      });
+    }
+    pintar();
+    window.addEventListener("resize", pintar);
+  })();
+
+  // Checklists persistentes + progreso
+  (function () {
+    var KEY = "invisible-pm-guia-v1";
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+    var boxes = Array.prototype.slice.call(document.querySelectorAll(".checks input[type=checkbox]"));
+
+    boxes.forEach(function (b) {
+      var k = b.getAttribute("data-k");
+      if (k in saved) { b.checked = !!saved[k]; }
+      else if (b.getAttribute("data-done") === "1") { b.checked = true; }
+      b.addEventListener("change", function () { saved[b.getAttribute("data-k")] = b.checked; persist(); refresh(); });
+    });
+
+    function persist() { try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {} }
+
+    function refresh() {
+      var total = boxes.length, done = boxes.filter(function (b) { return b.checked; }).length;
+      document.getElementById("num-global").textContent = done + "/" + total;
+      document.getElementById("bar-global").style.width = (total ? (100 * done / total) : 0) + "%";
+      document.querySelectorAll(".fase[data-fase]").forEach(function (f) {
+        var fb = Array.prototype.slice.call(f.querySelectorAll(".checks input"));
+        var c = f.querySelector(".contador");
+        if (!c || !fb.length) return;
+        var d = fb.filter(function (b) { return b.checked; }).length;
+        c.textContent = d + "/" + fb.length;
+        c.classList.toggle("completa", d === fb.length);
+      });
+    }
+
+    document.getElementById("btn-reset").addEventListener("click", function () {
+      if (!confirm("¿Desmarcar todos los pasos de la guía?")) return;
+      saved = {};
+      boxes.forEach(function (b) { b.checked = b.getAttribute("data-done") === "1"; saved[b.getAttribute("data-k")] = b.checked; });
+      persist(); refresh();
+    });
+
+    refresh();
+  })();
+</script>
+
+</body>
+</html>
