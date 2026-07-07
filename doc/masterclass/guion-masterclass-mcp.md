@@ -13,7 +13,8 @@
 
 | Pieza | Papel en invisible-pm | Llave | Estado ensayo 07/07 |
 |---|---|---|---|
-| **Fireflies** | `listar_reuniones` / `leer_reunion` (GraphQL) | `FIREFLIES_API_KEY` | ✅ probado con API real |
+| **Plaud** (fuente por defecto) | `listar_reuniones` / `leer_reunion` via CLI — decenas de reuniones reales ya procesadas | `plaud login` (una vez; la CLI refresca sola) | ✅ probado con reuniones reales (11m y 3h13m) |
+| **Fireflies** (fuente alternativa + camino de los alumnos) | Las mismas 2 herramientas via GraphQL — se conmuta con `FUENTE_REUNIONES=fireflies` | `FIREFLIES_API_KEY` | ✅ probado con API real |
 | **Notion** | `publicar_acta_notion` (REST, markdown → bloques) | `NOTION_API_KEY` (integración interna + compartir página Proyectos) | 🟡 código listo, falta token |
 | **Trello** | `actualizar_trello` (tarjetas + checklist + Hecho) | `TRELLO_API_KEY` + `TRELLO_TOKEN` | ✅ probado en vivo (tablero ReservaFácil creado) |
 | **Google Calendar** | `agendar_reunion` (API v3, OAuth escritorio) | `credentials.json` + `uv run autorizar_google.py` (una vez) | 🟡 código listo, falta OAuth |
@@ -40,7 +41,8 @@ Alternativas para la tabla de decisión del B2 (se mencionan, no se montan): Not
 
 ## Checklist — 1h antes
 
-- [ ] `claude mcp list` → 4 conexiones en verde.
+- [ ] `plaud me` → sesión viva (si no: `plaud login`, 30 segundos). El token caduca: comprobarlo SIEMPRE.
+- [ ] `claude mcp list` → `invisible-pm ✓ Connected`.
 - [ ] Prompt mágico copiado en un bloc de notas (no escribirlo en vivo).
 - [ ] Trello, Notion y Calendar abiertos en pestañas separadas y con zoom de pantalla al 125% mínimo.
 - [ ] Fireflies dashboard abierto (para enseñar el transcript cuando procese).
@@ -178,10 +180,17 @@ Reiniciar sesión de Claude Code y probar:
 
 Debe aparecer **la reunión simulada del B0, ya procesada.** Momento de aplauso natural.
 
+**El ejercicio del cambio de oídos (remate del B3, ~3 min):** el MCP arranca escuchando por Plaud
+(tus reuniones reales). Se re-registra con `-e FUENTE_REUNIONES=fireflies`, se reinicia la sesión, y
+el mismo prompt funciona contra Fireflies — *"he cambiado los oídos sin tocar el archivo, el tablón
+ni la agenda; eso es lo que compra una arquitectura de herramientas bien diseñada"*. Los alumnos
+replican el camino Fireflies (no tienen Plaud, es hardware).
+
 **Plan B por capas (tenerlo interiorizado, no leerlo):**
 - Si el código generado en vivo falla → cambiar a tu versión probada del repo `invisible_pm` (el MCP completo en `invisible-pm-mcp/server.py`, y de reserva la versión Node solo-Fireflies en `doc/masterclass/fireflies-mcp/index.js` — **ambas probadas contra la API real el 07/07**): *"esto le pasa a cualquiera en directo; por eso un profesional siempre prueba la víspera — os enseño la mía"*. La depuración en vivo de 2-3 min también es oro didáctico; más de 5 min, corta y cambia.
-- Si la API de Fireflies cae → MCP oficial remoto: `claude mcp add fireflies-oficial -- npx mcp-remote https://api.fireflies.ai/mcp --header "Authorization: Bearer TU_KEY"`.
-- Si Fireflies entero cae → el .txt exportado anoche: "leed este archivo como si fuera el transcript" y el flujo del B4 sigue intacto.
+- Si Fireflies cae → `FUENTE_REUNIONES=plaud` y siguen ahí TODAS tus reuniones reales (y al revés: si Plaud caduca en directo, `fireflies`). Dos proveedores de oídos = doble red.
+- Si la API de Fireflies cae y quieres enseñar el oficial → MCP remoto: `claude mcp add fireflies-oficial -- npx mcp-remote https://api.fireflies.ai/mcp --header "Authorization: Bearer TU_KEY"`.
+- Si TODO lo que escucha cae → el .txt exportado anoche: "leed este archivo como si fuera el transcript" y el flujo del B4 sigue intacto.
 
 **Q&A bloque 3 (min 80-85).**
 

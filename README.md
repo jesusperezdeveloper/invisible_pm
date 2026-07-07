@@ -4,10 +4,11 @@
 
 ```
                          ┌──────────────── invisible-pm (MCP propio, FastMCP) ────────────────┐
-Claude Code ── prompt ──▶│  Fireflies        Notion           Trello           Calendar       │
-                         │  (los oídos)      (el archivo)     (el tablón)      (la agenda)    │
-                         │  listar/leer      publicar_acta    actualizar       agendar        │
+Claude Code ── prompt ──▶│  Plaud⇄Fireflies   Notion           Trello           Calendar      │
+                         │  (los oídos)       (el archivo)     (el tablón)      (la agenda)   │
+                         │  listar/leer       publicar_acta    actualizar       agendar       │
                          └──────────────────────────────────────────────────────────────────┘
+                            FUENTE_REUNIONES=plaud|fireflies — cambia los oídos sin tocar el resto
 ```
 
 ## Contenido

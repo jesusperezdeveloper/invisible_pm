@@ -651,5 +651,97 @@
       "tipo": "AC"
     },
     "created_at": "2026-07-07T14:45:00.000000+00:00"
+  },
+  {
+    "id": "item-8f0c159b",
+    "name": "UC-009: Fuente de reuniones conmutable (Plaud ↔ Fireflies)",
+    "description": "# UC-009: Fuente de reuniones conmutable (Plaud ↔ Fireflies)\n\n**User Story:** US-02: Pipeline completo del PM invisible en un solo MCP\n**Actor:** Formador\n**Horas estimadas:** 1.0\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: Con FUENTE_REUNIONES=plaud, listar_reuniones y leer_reunion devuelven las reuniones reales de Plaud (verificado con reunión de 11m y de 3h13m)\n- AC-02: AC-02: Las transcripciones largas se truncan a 20.000 caracteres con aviso del tamaño omitido, en ambas fuentes\n- AC-03: AC-03: Con FUENTE_REUNIONES=fireflies el pipeline usa Fireflies sin cambiar nombres de herramientas ni el prompt mágico (regresión verificada)\n- AC-04: AC-04: Sesión Plaud caducada o id inexistente devuelven mensaje claro en español con la acción a tomar (plaud login / copiar id de listar_reuniones)\n\n## Contexto\nLos oídos del pipeline son intercambiables sin tocar el resto: FUENTE_REUNIONES=plaud (por defecto, CLI plaud autenticada con plaud login) o fireflies (GraphQL). El backend Plaud llama a la CLI por subprocess y ella gestiona el refresh del token. Transcripciones truncadas a 20k caracteres. Gotcha: no buscar '404' en la salida cruda de la CLI — el serial_number de una reunión puede contenerlo; los errores reales van marcados con '✗ [CODIGO]'.",
+    "state": "done",
+    "parent_id": "item-9c5745c9",
+    "labels": [
+      "UC",
+      "Actor:Formador"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "UC",
+      "uc_id": "UC-009",
+      "us_id": "US-02",
+      "horas": 1.0,
+      "pantallas": "",
+      "actor": "Formador"
+    },
+    "created_at": "2026-07-07T16:20:00.000000+00:00",
+    "external_source": "",
+    "external_id": "",
+    "updated_at": "2026-07-07T16:20:00.000000+00:00"
+  },
+  {
+    "id": "ac-1d6c667d",
+    "name": "[AC-01] AC-01: Con FUENTE_REUNIONES=plaud, listar_reuniones y leer_reunion devuelven las reuniones reales de Plaud (verificado con reunión de 11m y de 3h13m)",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-8f0c159b",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-01",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T16:20:00.000000+00:00",
+    "updated_at": "2026-07-07T16:20:00.000000+00:00"
+  },
+  {
+    "id": "ac-426ad926",
+    "name": "[AC-02] AC-02: Las transcripciones largas se truncan a 20.000 caracteres con aviso del tamaño omitido, en ambas fuentes",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-8f0c159b",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-02",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T16:20:00.000000+00:00",
+    "updated_at": "2026-07-07T16:20:00.000000+00:00"
+  },
+  {
+    "id": "ac-c621b2a0",
+    "name": "[AC-03] AC-03: Con FUENTE_REUNIONES=fireflies el pipeline usa Fireflies sin cambiar nombres de herramientas ni el prompt mágico (regresión verificada)",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-8f0c159b",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-03",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T16:20:00.000000+00:00",
+    "updated_at": "2026-07-07T16:20:00.000000+00:00"
+  },
+  {
+    "id": "ac-6e899724",
+    "name": "[AC-04] AC-04: Sesión Plaud caducada o id inexistente devuelven mensaje claro en español con la acción a tomar (plaud login / copiar id de listar_reuniones)",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-8f0c159b",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-04",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T16:20:00.000000+00:00",
+    "updated_at": "2026-07-07T16:20:00.000000+00:00"
   }
 ]

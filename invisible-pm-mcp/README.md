@@ -12,8 +12,8 @@ Claude Code redacta el acta y decide; este MCP le da las acreditaciones para eje
 
 | Herramienta | Servicio | Qué hace |
 |---|---|---|
-| `listar_reuniones(limite)` | Fireflies | Últimas reuniones: id, título, fecha, duración |
-| `leer_reunion(id?)` | Fireflies | Resumen, puntos de acción y transcripción con hablantes. Sin `id` = la última |
+| `listar_reuniones(limite)` | **Plaud** o Fireflies | Últimas reuniones: id, título, fecha, duración |
+| `leer_reunion(id?)` | **Plaud** o Fireflies | Resumen y transcripción con hablantes (truncada a 20k caracteres). Sin `id` = la última |
 | `publicar_acta_notion(titulo, contenido_markdown, pagina_padre?)` | Notion | Crea la página del acta (markdown → bloques) y devuelve su URL |
 | `actualizar_trello(nuevas_tarjetas, completadas?, tablero?)` | Trello | Tarjetas en "Por hacer" con responsable + checklist de criterios + vencimiento; mueve a "Hecho" lo cerrado |
 | `agendar_reunion(titulo, inicio, duracion_minutos?, descripcion?, invitados?)` | Calendar | Crea el evento y devuelve el enlace |
@@ -23,10 +23,20 @@ Claude Code redacta el acta y decide; este MCP le da las acreditaciones para eje
 1. [uv](https://docs.astral.sh/uv/): `curl -LsSf https://astral.sh/uv/install.sh | sh`
 2. `uv sync` (crea `.venv/` con Python 3.12 + FastMCP)
 
+## Los oídos son intercambiables
+
+La variable `FUENTE_REUNIONES` decide quién escucha, **sin tocar el resto del pipeline**:
+
+- `plaud` (por defecto) — usa la CLI `plaud` autenticada (`plaud login`, una vez; ella refresca el token). Ideal para demos: reuniones reales ya procesadas.
+- `fireflies` — API GraphQL con `FIREFLIES_API_KEY`. El camino replicable para los alumnos (cuenta gratuita, sin hardware).
+
+El "ejercicio del cambio" de la clase: re-registrar con `-e FUENTE_REUNIONES=fireflies`, reiniciar sesión, y el prompt mágico ni se entera. Esa es la lección.
+
 ## Credenciales (las 4 acreditaciones)
 
 | Variable | Dónde se consigue |
 |---|---|
+| Plaud | Sin clave en el `.env`: `plaud login` en la terminal (CLI instalada con Homebrew) |
 | `FIREFLIES_API_KEY` | Fireflies → Settings → Developer settings → API key |
 | `NOTION_API_KEY` | https://www.notion.so/my-integrations (integración interna) + compartir la página **Proyectos** con ella (··· → Conexiones) |
 | `TRELLO_API_KEY` / `TRELLO_TOKEN` | https://trello.com/power-ups/admin |

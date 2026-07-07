@@ -5,7 +5,7 @@ UN solo MCP con todo el pipeline del martes post-reunión:
     Fireflies (los oídos)  →  Notion (el archivo)  →  Trello (el tablón)  →  Calendar (la agenda)
 
 Herramientas:
-    listar_reuniones / leer_reunion     — Fireflies (GraphQL)
+    listar_reuniones / leer_reunion     — los oídos: Plaud (CLI) o Fireflies (GraphQL)
     publicar_acta_notion                — crea la página del acta en Notion
     actualizar_trello                   — tarjetas nuevas con checklist + mover a Hecho
     agendar_reunion                     — evento en Google Calendar
@@ -13,6 +13,9 @@ Herramientas:
 Claude redacta el acta y decide; este MCP le da las acreditaciones para ejecutar.
 
 Variables de entorno (.env / claude mcp add -e):
+    FUENTE_REUNIONES         — "plaud" (por defecto) o "fireflies". Cambiar los oídos
+                               no toca el resto del pipeline: esa es la gracia.
+    (Plaud)                  — sin API key: usa la CLI `plaud` autenticada (`plaud login`)
     FIREFLIES_API_KEY        — Fireflies → Settings → Developer settings
     NOTION_API_KEY           — https://www.notion.so/my-integrations (compartir la página con la integración)
     TRELLO_API_KEY, TRELLO_TOKEN — https://trello.com/power-ups/admin
@@ -27,6 +30,8 @@ Registro en Claude Code (ruta absoluta al python del venv tras `uv sync`):
 
 import os
 import re
+import shutil
+import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -41,6 +46,7 @@ mcp = FastMCP("invisible-pm")
 
 AQUI = Path(__file__).resolve().parent
 MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+MAX_TRANSCRIPCION = 20000  # caracteres; una reunión de 3h no debe inundar el contexto de Claude
 
 
 def _fecha(ms) -> str:
@@ -52,8 +58,99 @@ def _fecha(ms) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════════
-# FIREFLIES — los oídos
+# LOS OÍDOS — fuente conmutable: Plaud (por defecto) o Fireflies
 # ════════════════════════════════════════════════════════════════════════
+
+FUENTE_REUNIONES = os.environ.get("FUENTE_REUNIONES", "plaud").strip().lower()
+
+# ── Plaud (via CLI autenticada: `plaud login`) ──────────────────────────
+
+PLAUD_CLI = shutil.which("plaud") or "/opt/homebrew/bin/plaud"
+
+
+def _plaud_cli(*args: str) -> str:
+    if not Path(PLAUD_CLI).exists():
+        raise ToolError(
+            "No encuentro la CLI de Plaud. Instálala (brew install plaud o "
+            "https://support.plaud.ai → Plaud CLI) y ejecuta `plaud login`."
+        )
+    try:
+        res = subprocess.run(
+            [PLAUD_CLI, *args], capture_output=True, text=True, timeout=90
+        )
+    except subprocess.TimeoutExpired:
+        raise ToolError("Plaud no respondió en 90 segundos. Comprueba tu conexión a internet.")
+    salida = (res.stdout or "") + (res.stderr or "")
+    if res.returncode != 0 or "✗ [" in salida:
+        if "AUTH_FAILED" in salida:
+            raise ToolError("La sesión de Plaud ha caducado. Ejecuta `plaud login` en la terminal y reintenta.")
+        if any(c in salida for c in ("NOT_FOUND", "[404", "[500", "FETCH_FAILED")):
+            raise ToolError(
+                "Plaud no pudo recuperar esa reunión: lo más probable es que el id no exista "
+                "(cópialo tal cual de listar_reuniones)."
+            )
+        raise ToolError(f"Plaud respondió con error: {salida.strip()[:300]}")
+    return res.stdout
+
+
+def _plaud_limpiar(texto: str, *cabeceras: str) -> str:
+    """Quita las líneas de spinner/cabecera de la salida de la CLI."""
+    lineas = []
+    for linea in texto.splitlines():
+        s = linea.strip()
+        if not s or s.startswith("- Fetching") or any(s.startswith(c) for c in cabeceras):
+            continue
+        lineas.append(linea.rstrip())
+    return "\n".join(lineas).strip()
+
+
+FILA_PLAUD = re.compile(r"^\s{2}([0-9a-f]{32})\s+(.+?)\s{2,}(\d{4}-\d{2}-\d{2})\s+(\S+)\s*$")
+
+
+def _plaud_filas(pagina_texto: str) -> list[tuple[str, str, str, str]]:
+    return [m.groups() for l in pagina_texto.splitlines() if (m := FILA_PLAUD.match(l))]
+
+
+def _plaud_listar(limite: int) -> str:
+    salida = _plaud_cli("files", "-s", str(max(10, limite)))
+    filas = _plaud_filas(salida)[:limite]
+    if not filas:
+        return "No hay reuniones grabadas todavía en esta cuenta de Plaud."
+    return "\n".join(f"• [{fid}] {nombre} — {fecha} ({dur})" for fid, nombre, fecha, dur in filas)
+
+
+def _plaud_leer(id: str | None) -> str:
+    if not id:
+        filas = _plaud_filas(_plaud_cli("files", "-s", "10"))
+        if not filas:
+            return "No hay ninguna reunión grabada en esta cuenta de Plaud."
+        id = filas[0][0]
+    detalle = _plaud_limpiar(_plaud_cli("file", id), "File Details:")
+    campos = dict(
+        (k.strip(), v.strip())
+        for k, _, v in (l.partition(":") for l in detalle.splitlines())
+        if _
+    )
+    resumen = _plaud_limpiar(_plaud_cli("summary", id), "Summary:") or "(sin resumen)"
+    transcripcion = _plaud_limpiar(_plaud_cli("transcript", id), "Transcript:") or "(vacía)"
+    if len(transcripcion) > MAX_TRANSCRIPCION:
+        omitidos = len(transcripcion) - MAX_TRANSCRIPCION
+        transcripcion = transcripcion[:MAX_TRANSCRIPCION] + f"\n… (transcripción truncada: {omitidos} caracteres omitidos)"
+    return "\n".join(
+        [
+            f"REUNIÓN: {campos.get('name', id)}",
+            f"FECHA: {campos.get('start_at', campos.get('created_at', 'sin fecha'))} · DURACIÓN: {campos.get('duration', '?')}",
+            "",
+            "RESUMEN AUTOMÁTICO:",
+            resumen,
+            "",
+            "TRANSCRIPCIÓN:",
+            transcripcion,
+        ]
+    )
+
+
+# ── Fireflies (GraphQL) ─────────────────────────────────────────────────
 
 FIREFLIES_URL = "https://api.fireflies.ai/graphql"
 
@@ -86,11 +183,7 @@ def _fireflies(query: str, variables: dict | None = None) -> dict:
     return payload.get("data", {})
 
 
-@mcp.tool
-def listar_reuniones(
-    limite: Annotated[int, Field(ge=1, le=25, description="Cuántas reuniones devolver (1-25)")] = 5,
-) -> str:
-    """Lista las últimas reuniones grabadas en Fireflies con su id, título, fecha y duración."""
+def _fireflies_listar(limite: int) -> str:
     data = _fireflies(
         "query Transcripts($limit: Int) { transcripts(limit: $limit) { id title date duration } }",
         {"limit": limite},
@@ -104,15 +197,7 @@ def listar_reuniones(
     )
 
 
-@mcp.tool
-def leer_reunion(
-    id: Annotated[
-        str | None,
-        Field(description="Id de la reunión (de listar_reuniones). Vacío = la más reciente."),
-    ] = None,
-) -> str:
-    """Devuelve el contenido de una reunión de Fireflies: resumen, puntos de acción y
-    transcripción completa con quién dijo qué. Si no se indica id, devuelve la última reunión."""
+def _fireflies_leer(id: str | None) -> str:
     if not id:
         ultima = _fireflies("query { transcripts(limit: 1) { id } }")
         transcripts = ultima.get("transcripts") or []
@@ -136,6 +221,9 @@ def leer_reunion(
         f"{s.get('speaker_name') or 'Desconocido'}: {s.get('text', '')}"
         for s in (t.get("sentences") or [])
     )
+    if len(dialogo) > MAX_TRANSCRIPCION:
+        omitidos = len(dialogo) - MAX_TRANSCRIPCION
+        dialogo = dialogo[:MAX_TRANSCRIPCION] + f"\n… (transcripción truncada: {omitidos} caracteres omitidos)"
     resumen = (t.get("summary") or {}).get("overview") or "(sin resumen)"
     acciones = (t.get("summary") or {}).get("action_items") or "(ninguno)"
     return "\n".join(
@@ -153,6 +241,35 @@ def leer_reunion(
             dialogo or "(vacía)",
         ]
     )
+
+
+# ── Las dos herramientas de los oídos (despachan según FUENTE_REUNIONES) ─
+
+
+@mcp.tool
+def listar_reuniones(
+    limite: Annotated[int, Field(ge=1, le=25, description="Cuántas reuniones devolver (1-25)")] = 5,
+) -> str:
+    """Lista las últimas reuniones grabadas con su id, título, fecha y duración.
+    La fuente (Plaud o Fireflies) la decide la variable de entorno FUENTE_REUNIONES."""
+    if FUENTE_REUNIONES == "fireflies":
+        return _fireflies_listar(limite)
+    return _plaud_listar(limite)
+
+
+@mcp.tool
+def leer_reunion(
+    id: Annotated[
+        str | None,
+        Field(description="Id de la reunión (de listar_reuniones). Vacío = la más reciente."),
+    ] = None,
+) -> str:
+    """Devuelve el contenido de una reunión: resumen automático y transcripción completa
+    con quién dijo qué. Si no se indica id, devuelve la última reunión. La fuente
+    (Plaud o Fireflies) la decide la variable de entorno FUENTE_REUNIONES."""
+    if FUENTE_REUNIONES == "fireflies":
+        return _fireflies_leer(id)
+    return _plaud_leer(id)
 
 
 # ════════════════════════════════════════════════════════════════════════
