@@ -9,14 +9,17 @@
 
 ## Stack verificado (07/07/2026 — ensayo completo con API real)
 
-| Pieza | Estado | Cómo se conecta | Papel en clase |
+**Arquitectura v2 (decisión 07/07): UN solo MCP propio — `invisible-pm` — con las cuatro acreditaciones dentro.** Las cuatro tarjetas del Bloque 2 (Fireflies = los oídos, Notion = el archivo, Trello = el tablón, Calendar = la agenda) son los servicios a los que el MCP habla por API; cada uno con su llave en el `.env`. Los MCPs oficial/comunidad siguen existiendo como alternativas y alimentan la tabla de decisión del B2.
+
+| Pieza | Papel en invisible-pm | Llave | Estado ensayo 07/07 |
 |---|---|---|---|
-| **Notion** | MCP **oficial** remoto | `claude mcp add --transport http notion https://mcp.notion.com/mcp` → `/mcp` para autorizar | Ejemplo de "oficial sin fricción" |
-| **Trello** | **Sin oficial** → comunidad | Repo `GabrielRamirez/trello-mcp` (clone → `npm install` → `npm run setup` → registrar) | Ejemplo de "comunidad" |
-| **Google Calendar** | MCP **oficial** de Google | Existe, pero exige proyecto de Google Cloud + pantallas OAuth (~15 min de configuración) | Ejemplo de "oficial con fricción" — lo llevas TÚ preconfigurado |
-| **Fireflies** | MCP **oficial** remoto (`https://api.fireflies.ai/mcp`) | OAuth o API key con `mcp-remote` | **Plan B** del bloque 3 |
-| **Fireflies propio** | Lo construye Claude Code en directo (**Python + FastMCP**, gestionado con uv) | `claude mcp add fireflies -e FIREFLIES_API_KEY=... -- /ruta/fireflies-mcp/.venv/bin/python /ruta/fireflies-mcp/server.py` | **Estrella del bloque 3** |
-| **Zoom** | Fuera del flujo técnico | — | Fireflies ya captura la reunión; una conexión menos que mantener. Decirlo tal cual: simplificar también es diseñar. |
+| **Fireflies** | `listar_reuniones` / `leer_reunion` (GraphQL) | `FIREFLIES_API_KEY` | ✅ probado con API real |
+| **Notion** | `publicar_acta_notion` (REST, markdown → bloques) | `NOTION_API_KEY` (integración interna + compartir página Proyectos) | 🟡 código listo, falta token |
+| **Trello** | `actualizar_trello` (tarjetas + checklist + Hecho) | `TRELLO_API_KEY` + `TRELLO_TOKEN` | ✅ probado en vivo (tablero ReservaFácil creado) |
+| **Google Calendar** | `agendar_reunion` (API v3, OAuth escritorio) | `credentials.json` + `uv run autorizar_google.py` (una vez) | 🟡 código listo, falta OAuth |
+| **Zoom** | Fuera del circuito, a propósito | — | Fireflies ya escucha la reunión; simplificar también es diseñar |
+
+Alternativas para la tabla de decisión del B2 (se mencionan, no se montan): Notion oficial remoto (`claude mcp add --transport http notion https://mcp.notion.com/mcp`), Trello comunidad (`GabrielRamirez/trello-mcp`), Calendar oficial de Google (proyecto Cloud + OAuth ~15 min), Fireflies oficial remoto (`https://api.fireflies.ai/mcp`, plan B del B3).
 
 **Framing honesto obligatorio en B3:** Fireflies YA tiene MCP oficial. Construimos el nuestro igualmente por dos motivos que se dicen en voz alta: (1) abrir el capó — entender qué hay dentro de un MCP te permite evaluar cualquier otro; (2) control — el nuestro tiene 2 herramientas que hacen exactamente lo que queremos, el oficial trae de todo. Nadie sale de clase pensando que le hemos vendido trabajo innecesario.
 
@@ -25,10 +28,12 @@
 ## Checklist — HOY (víspera)
 
 - [ ] Enviar el pre-work a los alumnos (documento aparte). **Antes de las 18:00.**
-- [ ] Montar el tablero Trello del proyecto demo: tablero **ReservaFácil** con listas *Por hacer / En curso / Hecho* y 4-5 tarjetas creíbles (2 en curso, 1 hecha).
 - [ ] Crear en Notion la página **Proyectos → ReservaFácil** con un acta antigua de ejemplo (para que el acta nueva no caiga en vacío).
-- [ ] Conectar en TU Claude Code: Notion (oficial), Trello (comunidad, con el wizard), Calendar (oficial Google, con tu proyecto de Cloud). Verificar con `claude mcp list` → todo en verde.
-- [x] Generar tu API key de Fireflies (Settings → Developer settings) y probar el MCP propio: `cd fireflies-mcp && uv sync && FIREFLIES_API_KEY=clave uv run server.py` + una llamada real a `listar_reuniones`. **Hecho 07/07: batería completa en verde contra la API real (repo invisible_pm).**
+- [x] Registrar `invisible-pm` en TU Claude Code con las llaves del `.env` y verificar `claude mcp list` → ✓ Connected. **Hecho 07/07.**
+- [x] Generar tu API key de Fireflies y probar el MCP: batería completa en verde contra la API real (Fireflies + Trello). **Hecho 07/07 (repo invisible_pm).**
+- [ ] **Notion:** crear la integración interna en https://www.notion.so/my-integrations, compartir la página **Proyectos** con ella, añadir `NOTION_API_KEY` al `.env` y re-registrar el MCP (o pasarla con `-e`).
+- [ ] **Google Calendar:** descargar `credentials.json` del proyecto de Google Cloud a `invisible-pm-mcp/` y ejecutar `uv run autorizar_google.py` (una vez, abre navegador).
+- [x] Tablero Trello **ReservaFácil** con listas *Por hacer / En curso / Hecho* y 4 tarjetas creíbles. **Hecho 07/07 (via API).**
 - [ ] **Grabar la reunión pregrabada del gancho:** reunión Zoom de 3 min contigo mismo (o con Jesús) sobre ReservaFácil, con Fireflies invitado. Confirmar que el transcript está procesado.
 - [ ] Elegir voluntario para la reunión simulada en vivo (avisarle por privado, pasarle su papel del guion de reunión de abajo).
 - [ ] Exportar a .txt el transcript de la pregrabada → **plan B nuclear** si la API de Fireflies cae en directo.
@@ -130,17 +135,27 @@ Regla que se llevan: **oficial si existe y te vale → comunidad revisada si no 
 
 **Prompt de construcción (copiado, no escrito en vivo):**
 ```
-Crea un servidor MCP en Python con FastMCP en la carpeta fireflies-mcp que
-conecte con la API GraphQL de Fireflies (https://api.fireflies.ai/graphql,
-autenticación Bearer con la variable de entorno FIREFLIES_API_KEY).
-Solo 2 herramientas:
-1. listar_reuniones(limite): id, título, fecha y duración de las últimas reuniones.
-2. leer_reunion(id opcional): resumen, puntos de acción y transcripción completa
-   con el nombre de quien habla. Sin id, devuelve la última reunión.
-Usa FastMCP con las dependencias gestionadas por uv (pyproject.toml).
-Mensajes de error claros en español.
+Crea un servidor MCP en Python con FastMCP en la carpeta invisible-pm-mcp:
+el "Project Manager invisible". Herramientas:
+1. listar_reuniones(limite) y leer_reunion(id opcional): API GraphQL de
+   Fireflies (https://api.fireflies.ai/graphql, Bearer FIREFLIES_API_KEY).
+   leer_reunion devuelve resumen, puntos de acción y transcripción con
+   el nombre de quien habla; sin id, la última reunión.
+2. publicar_acta_notion(titulo, contenido_markdown, pagina_padre): crea la
+   página del acta en Notion (API REST, NOTION_API_KEY) y devuelve su URL.
+3. actualizar_trello(nuevas_tarjetas, completadas, tablero): tarjetas en
+   "Por hacer" con responsable en el título y criterios como checklist;
+   mueve a "Hecho" lo cerrado (TRELLO_API_KEY + TRELLO_TOKEN).
+4. agendar_reunion(titulo, inicio, duracion_minutos, descripcion): evento
+   en Google Calendar (OAuth con token.json).
+Usa FastMCP con dependencias gestionadas por uv (pyproject.toml).
+Mensajes de error claros en español que digan cómo conseguir cada llave.
 Dime al final el comando exacto de claude mcp add para registrarlo.
 ```
+
+**Gestión del tiempo en B3:** el MCP completo es demasiado para construirlo entero en directo.
+En clase se lanza este prompt y se narra mientras trabaja; la versión probada de la víspera
+(repo `invisible_pm`, carpeta `invisible-pm-mcp/`) es la que se registra si el directo se alarga.
 
 **Nota para el instructor (bug real cazado en el ensayo del 07/07):** el esquema GraphQL de
 Fireflies usa `transcript(id:)`, **no** `transcript(transcriptId:)`. Si Claude Code genera
@@ -152,9 +167,11 @@ argumento espera). Y con clave inválida Fireflies devuelve HTTP 200 + `errors`,
 
 **Registro y prueba (min 70-80):**
 ```
-cd fireflies-mcp && uv sync
-claude mcp add fireflies -e FIREFLIES_API_KEY=tu_clave -- \
-  /ruta/absoluta/fireflies-mcp/.venv/bin/python /ruta/absoluta/fireflies-mcp/server.py
+cd invisible-pm-mcp && uv sync
+claude mcp add invisible-pm \
+  -e FIREFLIES_API_KEY=... -e NOTION_API_KEY=... \
+  -e TRELLO_API_KEY=... -e TRELLO_TOKEN=... \
+  -- /ruta/absoluta/invisible-pm-mcp/.venv/bin/python /ruta/absoluta/invisible-pm-mcp/server.py
 ```
 Reiniciar sesión de Claude Code y probar:
 > "Lista mis últimas reuniones de Fireflies."
@@ -162,7 +179,7 @@ Reiniciar sesión de Claude Code y probar:
 Debe aparecer **la reunión simulada del B0, ya procesada.** Momento de aplauso natural.
 
 **Plan B por capas (tenerlo interiorizado, no leerlo):**
-- Si el código generado en vivo falla → cambiar a tu versión probada del repo `invisible_pm` (FastMCP en `fireflies-mcp/server.py`, y de reserva la versión Node en `doc/masterclass/fireflies-mcp/index.js` — **ambas probadas contra la API real el 07/07**): *"esto le pasa a cualquiera en directo; por eso un profesional siempre prueba la víspera — os enseño la mía"*. La depuración en vivo de 2-3 min también es oro didáctico; más de 5 min, corta y cambia.
+- Si el código generado en vivo falla → cambiar a tu versión probada del repo `invisible_pm` (el MCP completo en `invisible-pm-mcp/server.py`, y de reserva la versión Node solo-Fireflies en `doc/masterclass/fireflies-mcp/index.js` — **ambas probadas contra la API real el 07/07**): *"esto le pasa a cualquiera en directo; por eso un profesional siempre prueba la víspera — os enseño la mía"*. La depuración en vivo de 2-3 min también es oro didáctico; más de 5 min, corta y cambia.
 - Si la API de Fireflies cae → MCP oficial remoto: `claude mcp add fireflies-oficial -- npx mcp-remote https://api.fireflies.ai/mcp --header "Authorization: Bearer TU_KEY"`.
 - Si Fireflies entero cae → el .txt exportado anoche: "leed este archivo como si fuera el transcript" y el flujo del B4 sigue intacto.
 

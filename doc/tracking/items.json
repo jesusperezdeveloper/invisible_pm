@@ -334,5 +334,322 @@
     },
     "created_at": "2026-07-07T14:20:00.000000+00:00",
     "updated_at": "2026-07-07T14:25:00.000000+00:00"
+  },
+  {
+    "id": "item-9c5745c9",
+    "name": "US-02: Pipeline completo del PM invisible en un solo MCP",
+    "description": "# US-02: Pipeline completo del PM invisible en un solo MCP\n\n**Horas estimadas:** 6.0\n**Pantallas:** \n\nComo PM quiero que UNA sola acreditación (el MCP invisible-pm) cubra el martes post-reunión entero — leer la reunión de Fireflies, publicar el acta en Notion, actualizar el tablón de Trello y agendar la próxima reunión en Google Calendar — para que un único prompt en Claude Code se coma los 20-30 minutos de trabajo administrativo. Claude redacta el acta y decide; el MCP ejecuta con httpx contra las APIs (Notion REST, Trello REST, Google Calendar OAuth).",
+    "state": "user_stories",
+    "parent_id": null,
+    "labels": [
+      "US"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "US",
+      "us_id": "US-02",
+      "horas": 6.0,
+      "pantallas": ""
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "external_source": "",
+    "external_id": ""
+  },
+  {
+    "id": "item-d54ef89d",
+    "name": "UC-005: Herramienta publicar_acta_notion",
+    "description": "# UC-005: Herramienta publicar_acta_notion\n\n**User Story:** US-02: Pipeline completo del PM invisible en un solo MCP\n**Actor:** Claude Code (cliente MCP)\n**Horas estimadas:** 1.5\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: Crea la página del acta bajo la página indicada (por defecto 'Proyectos', buscada via /v1/search) y devuelve su URL\n- AC-02: AC-02: Convierte el markdown del acta a bloques de Notion: encabezados, listas, to-dos, divisores y negritas inline\n- AC-03: AC-03: Sin NOTION_API_KEY o sin página compartida, devuelve un error claro en español con los pasos exactos (my-integrations + Conexiones)\n\n## Contexto\nAPI REST de Notion (Notion-Version 2022-06-28). Integración interna: el usuario crea el token en notion.so/my-integrations y comparte la página Proyectos con la integración. Markdown → bloques (h1-h3, bullets, numeradas, to-dos, divisores, negritas) con tandas de 100 bloques.",
+    "state": "review",
+    "parent_id": "item-9c5745c9",
+    "labels": [
+      "UC",
+      "Actor:Claude Code (cliente MCP)"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "UC",
+      "uc_id": "UC-005",
+      "us_id": "US-02",
+      "horas": 1.5,
+      "pantallas": "",
+      "actor": "Claude Code (cliente MCP)"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "external_source": "",
+    "external_id": "",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "ac-4c21dca6",
+    "name": "[AC-01] AC-01: Crea la página del acta bajo la página indicada (por defecto 'Proyectos', buscada via /v1/search) y devuelve su URL",
+    "description": "",
+    "state": "backlog",
+    "parent_id": "item-d54ef89d",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-01",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00"
+  },
+  {
+    "id": "ac-53270f4e",
+    "name": "[AC-02] AC-02: Convierte el markdown del acta a bloques de Notion: encabezados, listas, to-dos, divisores y negritas inline",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-d54ef89d",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-02",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "ac-7f7f06a4",
+    "name": "[AC-03] AC-03: Sin NOTION_API_KEY o sin página compartida, devuelve un error claro en español con los pasos exactos (my-integrations + Conexiones)",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-d54ef89d",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-03",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "item-919e9f9b",
+    "name": "UC-006: Herramienta actualizar_trello",
+    "description": "# UC-006: Herramienta actualizar_trello\n\n**User Story:** US-02: Pipeline completo del PM invisible en un solo MCP\n**Actor:** Claude Code (cliente MCP)\n**Horas estimadas:** 1.5\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: Crea una tarjeta en 'Por hacer' por cada tarea nueva con el responsable en el título, los criterios como checklist y el vencimiento si se dijo\n- AC-02: AC-02: Mueve a 'Hecho' las tarjetas dadas por cerradas, localizándolas por coincidencia parcial del título\n- AC-03: AC-03: Tablero o lista inexistentes devuelven error claro en español listando los disponibles; credenciales inválidas, mensaje claro\n\n## Contexto\nAPI REST de Trello con TRELLO_API_KEY + TRELLO_TOKEN. Tablero por nombre (case-insensitive), tarjetas nuevas en 'Por hacer' con responsable en el título, checklist 'Criterios de aceptación' y due date; completadas → coincidencia parcial y movimiento a 'Hecho'.",
+    "state": "done",
+    "parent_id": "item-9c5745c9",
+    "labels": [
+      "UC",
+      "Actor:Claude Code (cliente MCP)"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "UC",
+      "uc_id": "UC-006",
+      "us_id": "US-02",
+      "horas": 1.5,
+      "pantallas": "",
+      "actor": "Claude Code (cliente MCP)"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "external_source": "",
+    "external_id": "",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "ac-78d19f42",
+    "name": "[AC-01] AC-01: Crea una tarjeta en 'Por hacer' por cada tarea nueva con el responsable en el título, los criterios como checklist y el vencimiento si se dijo",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-919e9f9b",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-01",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "ac-386d627b",
+    "name": "[AC-02] AC-02: Mueve a 'Hecho' las tarjetas dadas por cerradas, localizándolas por coincidencia parcial del título",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-919e9f9b",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-02",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "ac-23fc67c4",
+    "name": "[AC-03] AC-03: Tablero o lista inexistentes devuelven error claro en español listando los disponibles; credenciales inválidas, mensaje claro",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-919e9f9b",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-03",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "item-04aaba68",
+    "name": "UC-007: Herramienta agendar_reunion",
+    "description": "# UC-007: Herramienta agendar_reunion\n\n**User Story:** US-02: Pipeline completo del PM invisible en un solo MCP\n**Actor:** Claude Code (cliente MCP)\n**Horas estimadas:** 1.5\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: Crea el evento en el calendario primary con título, inicio ISO, duración e invitados opcionales, y devuelve el enlace htmlLink\n- AC-02: AC-02: Sin token.json, devuelve un error claro en español con el comando exacto de autorización (uv run autorizar_google.py)\n- AC-03: AC-03: Fecha en formato no ISO devuelve error claro con ejemplo del formato correcto\n\n## Contexto\nGoogle Calendar API v3 con OAuth de escritorio: autorizar_google.py se ejecuta UNA vez (credentials.json de Google Cloud → token.json); el MCP refresca el token solo. Zona horaria Europe/Madrid.",
+    "state": "review",
+    "parent_id": "item-9c5745c9",
+    "labels": [
+      "UC",
+      "Actor:Claude Code (cliente MCP)"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "UC",
+      "uc_id": "UC-007",
+      "us_id": "US-02",
+      "horas": 1.5,
+      "pantallas": "",
+      "actor": "Claude Code (cliente MCP)"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "external_source": "",
+    "external_id": "",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "ac-73518ef6",
+    "name": "[AC-01] AC-01: Crea el evento en el calendario primary con título, inicio ISO, duración e invitados opcionales, y devuelve el enlace htmlLink",
+    "description": "",
+    "state": "backlog",
+    "parent_id": "item-04aaba68",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-01",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00"
+  },
+  {
+    "id": "ac-4690ebe9",
+    "name": "[AC-02] AC-02: Sin token.json, devuelve un error claro en español con el comando exacto de autorización (uv run autorizar_google.py)",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-04aaba68",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-02",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "ac-3b5d7cd5",
+    "name": "[AC-03] AC-03: Fecha en formato no ISO devuelve error claro con ejemplo del formato correcto",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-04aaba68",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-03",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "item-68bcc901",
+    "name": "UC-008: Registro del MCP completo y demo E2E",
+    "description": "# UC-008: Registro del MCP completo y demo E2E\n\n**User Story:** US-02: Pipeline completo del PM invisible en un solo MCP\n**Actor:** Formador\n**Horas estimadas:** 1.5\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: El MCP invisible-pm queda registrado en Claude Code y aparece ✓ Connected en claude mcp list\n- AC-02: AC-02: El tablero ReservaFácil existe con listas Por hacer/En curso/Hecho y tarjetas creíbles para la demo\n- AC-03: AC-03: El prompt mágico completo (reunión → acta Notion + tarjetas Trello + evento Calendar) se ejecuta de punta a punta sin intervención\n\n## Contexto\nclaude mcp add invisible-pm con las -e de las 4 credenciales y ruta absoluta al python del venv. La demo E2E es el prompt mágico del B4: leer reunión → acta → tablón → agenda.",
+    "state": "review",
+    "parent_id": "item-9c5745c9",
+    "labels": [
+      "UC",
+      "Actor:Formador"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "UC",
+      "uc_id": "UC-008",
+      "us_id": "US-02",
+      "horas": 1.5,
+      "pantallas": "",
+      "actor": "Formador"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "external_source": "",
+    "external_id": "",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "ac-2f47a9ae",
+    "name": "[AC-01] AC-01: El MCP invisible-pm queda registrado en Claude Code y aparece ✓ Connected en claude mcp list",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-68bcc901",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-01",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "ac-d38b7826",
+    "name": "[AC-02] AC-02: El tablero ReservaFácil existe con listas Por hacer/En curso/Hecho y tarjetas creíbles para la demo",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-68bcc901",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-02",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00",
+    "updated_at": "2026-07-07T15:05:00.000000+00:00"
+  },
+  {
+    "id": "ac-5efc8d8b",
+    "name": "[AC-03] AC-03: El prompt mágico completo (reunión → acta Notion + tarjetas Trello + evento Calendar) se ejecuta de punta a punta sin intervención",
+    "description": "",
+    "state": "backlog",
+    "parent_id": "item-68bcc901",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-03",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T14:45:00.000000+00:00"
   }
 ]

@@ -9,6 +9,8 @@ Backend spec-driven **FreeForm** del SpecBox Engine (board `ff-7c307a263348`).
 
 ## Estado (ensayo víspera masterclass, 2026-07-07)
 
+**US-01 — Núcleo Fireflies (FastMCP):**
+
 | UC | Nombre | Estado | ACs |
 |---|---|---|---|
 | UC-001 | Scaffolding del servidor FastMCP en Python | ✅ done | 3/3 |
@@ -16,9 +18,20 @@ Backend spec-driven **FreeForm** del SpecBox Engine (board `ff-7c307a263348`).
 | UC-003 | Herramienta leer_reunion | ✅ done | 3/3 |
 | UC-004 | Registro en Claude Code y documentación | ✅ done | 3/3 |
 
-Único AC pendiente: **UC-002 AC-04** (cuenta sin reuniones → mensaje informativo). No
-verificable con esta cuenta porque ya tiene reuniones; el camino de código existe y está
-revisado. Verificable solo con una cuenta Fireflies vacía.
+**US-02 — Pipeline completo invisible-pm (un solo MCP):**
+
+| UC | Nombre | Estado | ACs |
+|---|---|---|---|
+| UC-005 | Herramienta publicar_acta_notion | 🔍 review | 2/3 |
+| UC-006 | Herramienta actualizar_trello | ✅ done | 3/3 |
+| UC-007 | Herramienta agendar_reunion | 🔍 review | 2/3 |
+| UC-008 | Registro del MCP completo y demo E2E | 🔍 review | 2/3 |
+
+ACs pendientes y por qué:
+- **UC-002 AC-04** (cuenta Fireflies sin reuniones) — no verificable con esta cuenta.
+- **UC-005 AC-01** (crear acta real) — falta `NOTION_API_KEY` (integración + compartir página).
+- **UC-007 AC-01** (crear evento real) — falta `credentials.json` + `uv run autorizar_google.py`.
+- **UC-008 AC-03** (prompt mágico E2E) — ejecutable cuando estén las dos llaves anteriores.
 
 ## Evidencias registradas (batería JSON-RPC stdio, API real)
 

@@ -1,0 +1,11 @@
+[project]
+name = "invisible-pm-mcp"
+version = "1.0.0"
+description = "El Project Manager invisible — un MCP que convierte una reunión en acta (Notion), tarjetas (Trello) y próxima reunión (Calendar)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.10",
+    "httpx>=0.27",
+    "google-api-python-client>=2.100",
+    "google-auth-oauthlib>=1.2",
+]

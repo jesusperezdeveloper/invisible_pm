@@ -6,9 +6,9 @@
   "source_of_truth": "doc/tracking/items.json",
   "board_id": "ff-7c307a263348",
   "counts": {
-    "us": 1,
-    "uc": 4,
-    "ac": 13
+    "us": 2,
+    "uc": 8,
+    "ac": 25
   },
-  "note": "La fuente de verdad es items.json. Spec v2: servidor reescrito en Python + FastMCP (antes Node.js)."
+  "note": "La fuente de verdad es items.json. US-01: nucleo Fireflies (FastMCP). US-02: pipeline completo invisible-pm (Notion + Trello + Calendar en el mismo MCP)."
 }

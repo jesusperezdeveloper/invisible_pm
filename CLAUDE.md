@@ -12,9 +12,11 @@
 
 ## Arquitectura
 
-Servidor MCP en Python con FastMCP (`fireflies-mcp/server.py`): transporte stdio, 2 herramientas
-(`listar_reuniones`, `leer_reunion`) contra la API GraphQL de Fireflies. Dependencias con uv
-(`pyproject.toml` + `uv.lock`). Los materiales de la masterclass viven en `doc/masterclass/`.
+Servidor MCP en Python con FastMCP (`invisible-pm-mcp/server.py`): transporte stdio, 5 herramientas
+que cubren el pipeline completo del PM invisible — Fireflies (`listar_reuniones`, `leer_reunion`),
+Notion (`publicar_acta_notion`), Trello (`actualizar_trello`) y Google Calendar (`agendar_reunion`).
+Dependencias con uv (`pyproject.toml` + `uv.lock`). Credenciales en `.env` del root (gitignorado).
+Los materiales de la masterclass viven en `doc/masterclass/`.
 
 Ver patrones detallados en: specbox-engine/architecture/{stack}/
 
