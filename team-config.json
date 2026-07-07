@@ -1,0 +1,159 @@
+{
+  "$schema": "SpecBox Engine v3.9.0 - Agent Teams Configuration (Orchestrator Isolation)",
+  "team": {
+    "name": "invisible_pm",
+    "description": "Equipo de desarrollo para invisible_pm",
+    "maxConcurrentTeammates": 3
+  },
+  "orchestrator": {
+    "model": "opus",
+    "prompt": "agent-teams/prompts/orchestrator.md",
+    "maxContextBudget": "15%",
+    "responsibilities": [
+      "Parsear planes y extraer fases",
+      "Delegar cada fase a un sub-agente limpio via Task tool",
+      "Recibir reportes estructurados de sub-agentes",
+      "Consolidar resumenes en Engram (mem_save)",
+      "Guardar checkpoints entre fases",
+      "Decidir self-healing si una fase falla",
+      "Crear rama, commits parciales y PR",
+      "NUNCA leer archivos fuente del proyecto",
+      "NUNCA escribir ni editar codigo directamente",
+      "NUNCA ejecutar lint, tests o build directamente"
+    ],
+    "fileOwnership": ["doc/plans/", ".quality/evidence/"],
+    "canDelegate": true,
+    "canImplement": false,
+    "canReadSourceFiles": false,
+    "canWriteCode": false
+  },
+  "roles": {
+    "DesignSpecialist": {
+      "model": "sonnet",
+      "prompt": "agent-teams/prompts/design-specialist.md",
+      "responsibilities": [
+        "Generacion de diseños via Stitch MCP",
+        "Conversion HTML a codigo",
+        "Design system"
+      ],
+      "fileOwnership": ["doc/design/"],
+      "priority": "FIRST",
+      "note": "Lanzar primero: Stitch tarda minutos por pantalla"
+    },
+    "FlutterSpecialist": {
+      "model": "sonnet",
+      "prompt": "agent-teams/prompts/flutter-specialist.md",
+      "responsibilities": [
+        "Features Flutter (BLoC + Freezed)",
+        "Responsive layouts (3 breakpoints)",
+        "Widgets como clases separadas"
+      ],
+      "fileOwnership": ["lib/presentation/", "lib/data/", "lib/domain/", "lib/core/widgets/"]
+    },
+    "ReactSpecialist": {
+      "model": "sonnet",
+      "prompt": "agent-teams/prompts/react-specialist.md",
+      "responsibilities": [
+        "Next.js App Router",
+        "Server Components + TanStack Query",
+        "Tailwind CSS"
+      ],
+      "fileOwnership": ["src/app/", "src/components/", "src/hooks/", "src/stores/"]
+    },
+    "PythonBackend": {
+      "model": "sonnet",
+      "prompt": "agent-teams/prompts/python-backend.md",
+      "responsibilities": [
+        "FastAPI endpoints",
+        "SQLAlchemy models",
+        "Pydantic schemas"
+      ],
+      "fileOwnership": ["src/api/", "src/models/", "src/schemas/", "src/services/"]
+    },
+    "DBInfra": {
+      "model": "sonnet",
+      "prompt": "agent-teams/prompts/db-infra.md",
+      "responsibilities": [
+        "Supabase/Neon/Firebase",
+        "Migraciones y schemas",
+        "RLS policies",
+        "Stripe integracion"
+      ],
+      "fileOwnership": ["supabase/", "migrations/", "prisma/"]
+    },
+    "AppScriptSpecialist": {
+      "model": "sonnet",
+      "prompt": "agent-teams/prompts/appscript-specialist.md",
+      "responsibilities": [
+        "Google Apps Script (clasp + TypeScript)",
+        "Web Apps, Add-ons, Triggers",
+        "Integraciones Google Workspace (Sheets, Gmail, Drive)"
+      ],
+      "fileOwnership": ["src/**/*.ts", "src/**/*.html", "html/", ".clasp.json", "appsscript.json", "dist/"]
+    },
+    "QAReviewer": {
+      "model": "sonnet",
+      "prompt": "agent-teams/prompts/qa-reviewer.md",
+      "responsibilities": [
+        "Tests unitarios, widget, integracion",
+        "Coverage 85%+",
+        "Edge cases + fuzz testing"
+      ],
+      "fileOwnership": ["test/", "tests/", "__tests__/"]
+    },
+    "AcceptanceTester": {
+      "model": "sonnet",
+      "prompt": "agent-teams/prompts/acceptance-tester.md",
+      "responsibilities": [
+        "Generar E2E/integration tests desde AC-XX del PRD",
+        "Capturar evidencia visual (screenshots, traces)",
+        "Ejecutar tests y reportar resultados"
+      ],
+      "fileOwnership": ["test/acceptance/", "tests/acceptance/", ".quality/evidence/**/acceptance/"]
+    },
+    "AcceptanceValidator": {
+      "model": "sonnet",
+      "prompt": "agent-teams/prompts/acceptance-validator.md",
+      "responsibilities": [
+        "Validacion independiente de acceptance criteria",
+        "Verificar implementacion contra PRD",
+        "Emitir veredicto ACCEPTED/CONDITIONAL/REJECTED"
+      ],
+      "fileOwnership": [".quality/evidence/"]
+    }
+  },
+  "communication": {
+    "patterns": {
+      "delegate": "Orchestrator → Task(Specialist): contexto minimo + Phase Task Template",
+      "report": "Task(Specialist) → Orchestrator: reporte estructurado (files, lint, status, errors)",
+      "persist": "Orchestrator → Engram: mem_save con resumen de fase",
+      "heal": "Orchestrator → Task(Specialist): healing prompt si phase_status == failed"
+    },
+    "rules": {
+      "isolation": "Cada sub-agente recibe contexto limpio, sin estado de fases anteriores",
+      "budgetPerTask": "~20,000 tokens max de contexto inyectado (v5.24.0: expandido para Opus 4.7)",
+      "orchestratorBudget": "<15% de la ventana de contexto total",
+      "reportFormat": "files_created, files_modified, lint_result, phase_status, errors (max 3 lines)"
+    }
+  },
+  "qualityGates": {
+    "preCommit": {
+      "flutter": "dart fix --apply && dart analyze && flutter test",
+      "react": "npx eslint . --fix && npx tsc --noEmit && npx jest",
+      "go": "golangci-lint run && go test -race ./...",
+      "python": "ruff check . --fix && mypy . && pytest",
+      "google-apps-script": "npm run test && npm run lint && npm run push"
+    },
+    "minCoverage": 85
+  },
+  "notes": {
+    "activateRoles": "Activar solo los roles necesarios para el proyecto",
+    "orchestratorRule": "El Orchestrator NUNCA implementa codigo. Solo planifica, delega, consolida y persiste en Engram.",
+    "flutterOnly": "Orchestrator + DesignSpecialist + FlutterSpecialist + DBInfra + QAReviewer + AcceptanceTester + AcceptanceValidator",
+    "reactOnly": "Orchestrator + DesignSpecialist + ReactSpecialist + DBInfra + QAReviewer + AcceptanceTester + AcceptanceValidator",
+    "goOnly": "Orchestrator + GoSpecialist + DBInfra + QAReviewer + AcceptanceTester + AcceptanceValidator",
+    "appsScriptOnly": "Orchestrator + AppScriptSpecialist + QAReviewer",
+    "fullStack": "Orchestrator + todos los roles relevantes",
+    "contextBudget": "Cada Task recibe max ~20,000 tokens (v5.24.0: expandido para Opus 4.7). Si una fase excede 30% de ventana, splitear en sub-fases."
+  }
+}

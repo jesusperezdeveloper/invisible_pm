@@ -1,0 +1,335 @@
+[
+  {
+    "id": "item-83cece70",
+    "name": "US-01: MCP propio de Fireflies — El Project Manager invisible",
+    "description": "# US-01: MCP propio de Fireflies — El Project Manager invisible\n\n**Horas estimadas:** 4.0\n**Pantallas:** \n\nComo formador de la masterclass MCP quiero un servidor MCP propio en Node.js que conecte Claude Code con la API GraphQL de Fireflies, con exactamente 2 herramientas (listar_reuniones y leer_reunion), para demostrar en directo que construir un MCP es describir bien lo que quieres. El servidor usa @modelcontextprotocol/sdk, transporte stdio, autenticación Bearer con la variable de entorno FIREFLIES_API_KEY y mensajes de error claros en español.",
+    "state": "user_stories",
+    "parent_id": null,
+    "labels": [
+      "US"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "US",
+      "us_id": "US-01",
+      "horas": 4.0,
+      "pantallas": ""
+    },
+    "created_at": "2026-07-07T11:45:57.812124+00:00",
+    "external_source": "",
+    "external_id": ""
+  },
+  {
+    "id": "item-42053a7d",
+    "name": "UC-001: Scaffolding del servidor MCP en Node.js",
+    "description": "# UC-001: Scaffolding del servidor MCP en Node.js\n\n**User Story:** US-01: MCP propio de Fireflies — El Project Manager invisible\n**Actor:** Desarrollador\n**Horas estimadas:** 1.0\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: package.json en ESM (type: module) con dependencias @modelcontextprotocol/sdk y zod; npm install termina sin errores con Node >= 18\n- AC-02: AC-02: node index.js arranca el servidor sobre transporte stdio y emite confirmación por stderr (nunca por stdout, que rompería el protocolo)\n- AC-03: AC-03: El servidor responde al handshake MCP (initialize + tools/list) exponiendo exactamente 2 herramientas: listar_reuniones y leer_reunion\n\n## Contexto\nBase del servidor: index.js único, sin build step. La API de Fireflies es GraphQL en https://api.fireflies.ai/graphql con Authorization: Bearer $FIREFLIES_API_KEY.",
+    "state": "done",
+    "parent_id": "item-83cece70",
+    "labels": [
+      "UC",
+      "Actor:Desarrollador"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "UC",
+      "uc_id": "UC-001",
+      "us_id": "US-01",
+      "horas": 1.0,
+      "pantallas": "",
+      "actor": "Desarrollador"
+    },
+    "created_at": "2026-07-07T11:45:57.812346+00:00",
+    "external_source": "",
+    "external_id": "",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "ac-45ed1284",
+    "name": "[AC-01] AC-01: package.json en ESM (type: module) con dependencias @modelcontextprotocol/sdk y zod; npm install termina sin errores con Node >= 18",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-42053a7d",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-01",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812410+00:00",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "ac-a1d7dfac",
+    "name": "[AC-02] AC-02: node index.js arranca el servidor sobre transporte stdio y emite confirmación por stderr (nunca por stdout, que rompería el protocolo)",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-42053a7d",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-02",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812434+00:00",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "ac-e59e6e52",
+    "name": "[AC-03] AC-03: El servidor responde al handshake MCP (initialize + tools/list) exponiendo exactamente 2 herramientas: listar_reuniones y leer_reunion",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-42053a7d",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-03",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812447+00:00",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "item-7359170d",
+    "name": "UC-002: Herramienta listar_reuniones",
+    "description": "# UC-002: Herramienta listar_reuniones\n\n**User Story:** US-01: MCP propio de Fireflies — El Project Manager invisible\n**Actor:** Claude Code (cliente MCP)\n**Horas estimadas:** 1.0\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: Devuelve id, título, fecha (formateada es-ES) y duración en minutos de las últimas reuniones\n- AC-02: AC-02: Parámetro limite validado con zod: entero 1-25, valor por defecto 5\n- AC-03: AC-03: Sin FIREFLIES_API_KEY definida, la herramienta devuelve un error claro en español que indica dónde obtener la clave (Settings → Developer settings)\n- AC-04: AC-04: Cuenta sin reuniones devuelve un mensaje informativo, no una excepción\n\n## Contexto\nQuery GraphQL: transcripts(limit: $limit) { id title date duration }. El campo date llega en milisegundos epoch.",
+    "state": "review",
+    "parent_id": "item-83cece70",
+    "labels": [
+      "UC",
+      "Actor:Claude Code (cliente MCP)"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "UC",
+      "uc_id": "UC-002",
+      "us_id": "US-01",
+      "horas": 1.0,
+      "pantallas": "",
+      "actor": "Claude Code (cliente MCP)"
+    },
+    "created_at": "2026-07-07T11:45:57.812509+00:00",
+    "external_source": "",
+    "external_id": "",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "ac-23a356f8",
+    "name": "[AC-01] AC-01: Devuelve id, título, fecha (formateada es-ES) y duración en minutos de las últimas reuniones",
+    "description": "",
+    "state": "backlog",
+    "parent_id": "item-7359170d",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-01",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812549+00:00"
+  },
+  {
+    "id": "ac-0e3b4e20",
+    "name": "[AC-02] AC-02: Parámetro limite validado con zod: entero 1-25, valor por defecto 5",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-7359170d",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-02",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812566+00:00",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "ac-f10fdef7",
+    "name": "[AC-03] AC-03: Sin FIREFLIES_API_KEY definida, la herramienta devuelve un error claro en español que indica dónde obtener la clave (Settings → Developer settings)",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-7359170d",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-03",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812580+00:00",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "ac-74fef0b3",
+    "name": "[AC-04] AC-04: Cuenta sin reuniones devuelve un mensaje informativo, no una excepción",
+    "description": "",
+    "state": "backlog",
+    "parent_id": "item-7359170d",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-04",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812593+00:00"
+  },
+  {
+    "id": "item-89622364",
+    "name": "UC-003: Herramienta leer_reunion",
+    "description": "# UC-003: Herramienta leer_reunion\n\n**User Story:** US-01: MCP propio de Fireflies — El Project Manager invisible\n**Actor:** Claude Code (cliente MCP)\n**Horas estimadas:** 1.0\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: Con id devuelve resumen automático, puntos de acción y transcripción completa con el nombre de quien habla\n- AC-02: AC-02: Sin id devuelve la última reunión (transcripts limit 1 → transcript por id)\n- AC-03: AC-03: Errores de la API GraphQL (clave inválida, id inexistente) se devuelven como mensaje claro en español, nunca como stack trace\n\n## Contexto\nQuery GraphQL: transcript(transcriptId: $id) { id title date duration summary { overview action_items } sentences { speaker_name text } }.",
+    "state": "review",
+    "parent_id": "item-83cece70",
+    "labels": [
+      "UC",
+      "Actor:Claude Code (cliente MCP)"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "UC",
+      "uc_id": "UC-003",
+      "us_id": "US-01",
+      "horas": 1.0,
+      "pantallas": "",
+      "actor": "Claude Code (cliente MCP)"
+    },
+    "created_at": "2026-07-07T11:45:57.812657+00:00",
+    "external_source": "",
+    "external_id": "",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "ac-dcaff116",
+    "name": "[AC-01] AC-01: Con id devuelve resumen automático, puntos de acción y transcripción completa con el nombre de quien habla",
+    "description": "",
+    "state": "backlog",
+    "parent_id": "item-89622364",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-01",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812691+00:00"
+  },
+  {
+    "id": "ac-c7e15d34",
+    "name": "[AC-02] AC-02: Sin id devuelve la última reunión (transcripts limit 1 → transcript por id)",
+    "description": "",
+    "state": "backlog",
+    "parent_id": "item-89622364",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-02",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812707+00:00"
+  },
+  {
+    "id": "ac-870fc4a8",
+    "name": "[AC-03] AC-03: Errores de la API GraphQL (clave inválida, id inexistente) se devuelven como mensaje claro en español, nunca como stack trace",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-89622364",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-03",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812719+00:00",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "item-73afeb66",
+    "name": "UC-004: Registro en Claude Code y documentación",
+    "description": "# UC-004: Registro en Claude Code y documentación\n\n**User Story:** US-01: MCP propio de Fireflies — El Project Manager invisible\n**Actor:** Formador\n**Horas estimadas:** 1.0\n**Pantallas:** \n\n## Criterios de Aceptacion\n- AC-01: AC-01: README.md documenta instalación (npm install), obtención de la API key y las 2 herramientas\n- AC-02: AC-02: README incluye el comando exacto de registro: claude mcp add fireflies -e FIREFLIES_API_KEY=clave -- node /ruta/absoluta/index.js\n- AC-03: AC-03: README incluye el plan B con el MCP oficial remoto de Fireflies via mcp-remote\n\n## Contexto\nEl comando de registro debe usar ruta absoluta al index.js. Tras registrar, hay que reiniciar la sesión de Claude Code para que cargue el servidor.",
+    "state": "done",
+    "parent_id": "item-83cece70",
+    "labels": [
+      "UC",
+      "Actor:Formador"
+    ],
+    "priority": "none",
+    "meta": {
+      "tipo": "UC",
+      "uc_id": "UC-004",
+      "us_id": "US-01",
+      "horas": 1.0,
+      "pantallas": "",
+      "actor": "Formador"
+    },
+    "created_at": "2026-07-07T11:45:57.812792+00:00",
+    "external_source": "",
+    "external_id": "",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "ac-40494063",
+    "name": "[AC-01] AC-01: README.md documenta instalación (npm install), obtención de la API key y las 2 herramientas",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-73afeb66",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-01",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812853+00:00",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "ac-f6845a5a",
+    "name": "[AC-02] AC-02: README incluye el comando exacto de registro: claude mcp add fireflies -e FIREFLIES_API_KEY=clave -- node /ruta/absoluta/index.js",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-73afeb66",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-02",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812869+00:00",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  },
+  {
+    "id": "ac-883be477",
+    "name": "[AC-03] AC-03: README incluye el plan B con el MCP oficial remoto de Fireflies via mcp-remote",
+    "description": "",
+    "state": "done",
+    "parent_id": "item-73afeb66",
+    "labels": [
+      "AC"
+    ],
+    "priority": "none",
+    "meta": {
+      "ac_id": "AC-03",
+      "tipo": "AC"
+    },
+    "created_at": "2026-07-07T11:45:57.812881+00:00",
+    "updated_at": "2026-07-07T11:50:00.000000+00:00"
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "board_id": "ff-7c307a263348",
+  "board_name": "invisible_pm",
+  "board_url": "file:///Users/jesusperezsanchez/Desktop/Proyectos/0_embed_build/VA360/Potenzia/Potenzia 4.1/masterclass/invisible_pm/doc/tracking",
+  "states": {
+    "user_stories": "user_stories",
+    "backlog": "backlog",
+    "in_progress": "in_progress",
+    "review": "review",
+    "done": "done"
+  },
+  "labels": {
+    "US": "lbl-dfc0791d",
+    "UC": "lbl-2d1c4e35",
+    "AC": "lbl-553a0a34",
+    "Infra": "lbl-5e2ef705",
+    "Bloqueado": "lbl-003d498c"
+  },
+  "custom_fields": {},
+  "created_at": "2026-07-07T11:38:00.000000+00:00"
+}

@@ -1,0 +1,332 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "WebFetch(domain:*)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/quality-first-guard.mjs",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/healing-budget-guard.mjs",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pipeline-phase-guard.mjs",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/stripe-safety-guard.mjs",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/quality-first-guard.mjs",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/healing-budget-guard.mjs",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pipeline-phase-guard.mjs",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/stripe-safety-guard.mjs",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(.*--no-verify.*)",
+            "command": "node .claude/hooks/no-bypass-guard.mjs",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(.*push.*--force.*)",
+            "command": "node .claude/hooks/no-bypass-guard.mjs",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(.*push.*-f .*)",
+            "command": "node .claude/hooks/no-bypass-guard.mjs",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(.*reset --hard.*)",
+            "command": "node .claude/hooks/no-bypass-guard.mjs",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/read-tracker.mjs",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(.*git commit.*)",
+            "command": "node .claude/hooks/commit-spec-guard.mjs",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "if": "Bash(.*git commit.*)",
+            "command": "node .claude/hooks/pre-commit-lint.mjs",
+            "timeout": 60
+          },
+          {
+            "type": "command",
+            "if": "Bash(.*git commit.*)",
+            "command": "node .claude/hooks/e2e-gate.mjs",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "if": "Bash(.*git commit.*)",
+            "command": "node .claude/hooks/checkpoint-freshness-guard.mjs",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(.*git push.*)",
+            "command": "node .claude/hooks/uc-lifecycle-guard.mjs",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Write(src/.*)",
+            "command": "node .claude/hooks/spec-guard.mjs",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "if": "Write(lib/.*)",
+            "command": "node .claude/hooks/spec-guard.mjs",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "if": "Write(presentation/pages/.*)",
+            "command": "node .claude/hooks/design-gate.mjs",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "if": "Write(src/pages/.*)",
+            "command": "node .claude/hooks/design-gate.mjs",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "if": "Write(app/.*)",
+            "command": "node .claude/hooks/design-gate.mjs",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Edit(src/.*)",
+            "command": "node .claude/hooks/spec-guard.mjs",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "if": "Edit(lib/.*)",
+            "command": "node .claude/hooks/spec-guard.mjs",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "if": "Edit(presentation/pages/.*)",
+            "command": "node .claude/hooks/design-gate.mjs",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "if": "Edit(src/pages/.*)",
+            "command": "node .claude/hooks/design-gate.mjs",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "if": "Edit(app/.*)",
+            "command": "node .claude/hooks/design-gate.mjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/on-session-end.mjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "trello": {
+    "boardId": "",
+    "_comment": "Dejar vacío si no usa Trello. Rellenar con el ID del board tras ejecutar setup_board."
+  },
+  "acceptance": {
+    "framework": "gherkin",
+    "language": "es",
+    "features_path": {
+      "flutter": "test/acceptance/features/",
+      "react": "tests/acceptance/features/",
+      "go": "tests/acceptance/features/",
+      "python": "tests/acceptance/features/",
+      "google-apps-script": "tests/acceptance/features/"
+    }
+  },
+  "implement": {
+    "task_isolation": {
+      "enabled": true,
+      "task_budget_tokens": 16000,
+      "task_budget_mode": "warn",
+      "ownership_mode": "warn",
+      "_v5_32_note": "v5.32.0 'Implement Task Isolation'. Modes: warn (default — emit stderr WARNING but never block) | strict (BLOCK with exit 2) | off (no-op). Promote to strict after 2 weeks of telemetry confirms low false-positive rate. The 16000 budget leaves a 20% margin over the ideal 20k declared in the SKILL.md for the Task's response tokens (~4k)."
+    }
+  },
+  "stitch": {
+    "projectId": "TBD",
+    "deviceType": "DESKTOP",
+    "modelId": "GEMINI_3_PRO",
+    "contract": "native_v2",
+    "_contract_note": "v6.4.0 introduced the native Material 3 chain (upload_design_md → create_design_system_from_design_md → apply_design_system). 'native_v2' is the default for new projects. 'inline_prefix_v1' is the v5.31 transitional fallback (still supported in v6.x, removed in v7.0).",
+    "fallback": {
+      "enabled": true,
+      "strategy": ["edit_baseline", "variants_refine", "regenerate"],
+      "max_total_attempts": 3,
+      "_v6_4_note": "v6.4.0 removed the Flash safety-net fallback. Stitch MCP is free of charge — degrading to Flash to save quota was solving a non-problem."
+    },
+    "prompt": {
+      "validator_mode": "warn",
+      "_validator_mode_note": "warn|strict — default 'warn' for the first 2 weeks post-release. Promote to 'strict' once telemetry confirms <2% false-positive rate."
+    }
+  },
+  "plane": {
+    "defaultProject": "TBD",
+    "defaultState": "Backlog",
+    "projectId": "TBD",
+    "defaultAssignee": "TBD"
+  },
+  "veg": {
+    "enabled": true,
+    "providers": ["stitch"],
+    "_providers_note": "Visual provider(s) for the VEG. Allowed: 'stitch' (text-to-mockup, default) and 'claude_design' (claude.ai/design via the harness DesignSync tool — designs with the real compiled design-system, 1:1 to code). Use ['claude_design'] or ['stitch','claude_design']. A project without this key behaves exactly like Stitch-only. When 'claude_design' is active AND a compiled design-system exists (gate ready), claude_design is the preferred provider; Stitch is the fallback for the early phase without code. US-29.",
+    "claude_design": {
+      "projectId": null,
+      "syncRepo": null,
+      "_note": "claude.ai/design project anchor. 'projectId' is optional — the engine creates it with claude_design_create_project on first use and persists it here (like Stitch anchors its projectId). 'syncRepo' is the repo whose dist/ holds the design-system. AUTH: Claude Design uses the claude.ai login of the session on this machine (DesignSync) — NO API key, NO service account; the consumption is billed to the logged-in user's subscription. There is NO programmatic delete: removing a Claude Design project is a manual action in claude.ai.",
+      "_anchor_rule": "Topology-aware: in a multirepo orchestrator/satellite project the design-system lives ONCE in the ORCHESTRATOR (projectId anchored there, dist/ synced once; UI satellites consume it). In a monorepo it lives in the repo itself."
+    },
+    "image_provider": {
+      "primary": "canva",
+      "fallback": "lansespirit",
+      "maxImagesPerScreen": 5,
+      "defaultAspectRatio": "16:9",
+      "stockSearchFirst": false,
+      "_setup_instructions": "Primary: Canva MCP (free with Canva Pro/Premium). Fallback: lansespirit (paid per image). See veg.mcpServers below.",
+      "_cost_warning": "Canva: €0 with Pro/Premium subscription. Fallback: OpenAI ($0.02-0.19/img), Gemini ($0.02-0.06/img)"
+    },
+    "mcpServers": {
+      "_comment": "Copy the provider(s) you want into .vscode/mcp.json or claude_desktop_config.json",
+      "canva": {
+        "command": "npx",
+        "args": ["-y", "mcp-remote@latest", "https://mcp.canva.com/mcp"],
+        "_requires": "Canva Pro or Premium subscription. Auth via OAuth (browser popup). No API key needed.",
+        "_cost": "€0 additional — included in Canva subscription"
+      },
+      "freepik": {
+        "command": "npx",
+        "args": ["-y", "mcp-remote", "https://api.freepik.com/mcp", "--header", "x-freepik-api-key:${FREEPIK_API_KEY}"],
+        "_requires": "FREEPIK_API_KEY — Get at https://www.freepik.com/api — Paid plan required for generation",
+        "_cost": "Pay-per-use (Essential €5/mo, Premium €10/mo, Premium+ €22.50/mo)"
+      },
+      "image-gen": {
+        "command": "python",
+        "args": ["-m", "image_gen_mcp"],
+        "env": {
+          "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+          "GOOGLE_API_KEY": "${GOOGLE_API_KEY}"
+        },
+        "_requires": "pip install image-gen-mcp — Needs OPENAI_API_KEY and/or GOOGLE_API_KEY with active billing",
+        "_cost": "OpenAI: $0.02-0.19/img, Gemini: $0.02-0.06/img"
+      }
+    },
+    "motion": {
+      "enabled": true,
+      "flutter": {
+        "package": "flutter_animate",
+        "version": "^4.5.2"
+      },
+      "react": {
+        "library": "motion",
+        "version": "^12.35.0"
+      }
+    },
+    "defaults": {
+      "fallback_mode": "uniform",
+      "fallback_motion_level": "moderate"
+    }
+  }
+}

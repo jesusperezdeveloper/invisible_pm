@@ -1,0 +1,14 @@
+{
+  "project": "invisible_pm",
+  "schema_version": "1.0",
+  "backend": "freeform",
+  "updated": "2026-07-07",
+  "source_of_truth": "doc/tracking/items.json",
+  "board_id": "ff-7c307a263348",
+  "counts": {
+    "us": 1,
+    "uc": 4,
+    "ac": 13
+  },
+  "note": "La fuente de verdad es items.json. config.json y labels.json replican el board creado por setup_board."
+}

@@ -1,0 +1,17 @@
+{
+  "name": "fireflies-mcp",
+  "version": "1.0.0",
+  "description": "Servidor MCP mínimo que conecta Claude Code con las reuniones de Fireflies (2 herramientas: listar_reuniones y leer_reunion)",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": ["mcp", "fireflies", "claude-code"],
+  "author": "Jesús Pérez",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  }
+}
